@@ -1,19 +1,15 @@
 "use client";
 
-import { motion, useScroll, useTransform, type Variants } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 import { useRef } from "react";
 
-const easeOut = [0.16, 1, 0.3, 1] as const;
+const easeInOut = [0.16, 1, 0.3, 1] as const;
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
-  visible: (i: number = 0) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, delay: i * 0.1, ease: easeOut },
-  }),
-} as Variants;
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: easeInOut } },
+};
 
 const stagger = {
   hidden: { opacity: 0 },
@@ -34,11 +30,7 @@ export default function Home() {
 
   return (
     <>
-      {/* ════════════════════════════════════════════════
-             HERO SECTION
-          ════════════════════════════════════════════════ */}
       <section ref={heroRef} className="relative min-h-screen flex items-center overflow-hidden">
-        {/* Background effects */}
         <div className="absolute inset-0 bg-grid" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-600/10 rounded-full blur-[120px]" />
         <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-indigo-500/10 rounded-full blur-[100px]" />
@@ -53,7 +45,6 @@ export default function Home() {
             initial="hidden"
             animate="visible"
           >
-            {/* Badge */}
             <motion.div
               variants={fadeUp}
               className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-neutral-300 mb-8"
@@ -62,7 +53,6 @@ export default function Home() {
               Video-first talent discovery
             </motion.div>
 
-            {/* Headline */}
             <motion.h1
               variants={fadeUp}
               className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-bold tracking-tight leading-[1.05]"
@@ -74,7 +64,6 @@ export default function Home() {
               Start being seen.
             </motion.h1>
 
-            {/* Subheadline */}
             <motion.p
               variants={fadeUp}
               className="mt-8 text-lg sm:text-xl text-neutral-400 max-w-2xl mx-auto leading-relaxed"
@@ -83,25 +72,14 @@ export default function Home() {
               you want. Get discovered by recruiters who already know you&apos;re worth talking to.
             </motion.p>
 
-            {/* CTA Buttons */}
             <motion.div variants={fadeUp} className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/getting-started"
                 className="group inline-flex items-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold text-base hover:shadow-xl hover:shadow-purple-500/30 transition-all duration-300"
               >
                 Create your profile — it&apos;s free
-                <svg
-                  className="w-5 h-5 group-hover:translate-x-0.5 transition-transform"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 8l4 4m0 0l-4 4m4-4H3"
-                  />
+                <svg className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
               </Link>
               <a
@@ -115,7 +93,6 @@ export default function Home() {
               </a>
             </motion.div>
 
-            {/* Social proof */}
             <motion.div variants={fadeUp} className="mt-16">
               <p className="text-xs uppercase tracking-widest text-neutral-600 mb-4">
                 Built for the roles that need real people
@@ -136,7 +113,6 @@ export default function Home() {
           </motion.div>
         </motion.div>
 
-        {/* Scroll indicator */}
         <motion.div
           className="absolute bottom-8 left-1/2 -translate-x-1/2"
           animate={{ y: [0, 8, 0] }}
@@ -148,9 +124,6 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* ════════════════════════════════════════════════
-          HOW IT WORKS
-      ════════════════════════════════════════════════ */}
       <section id="how-it-works" className="relative py-32">
         <div className="absolute inset-0 bg-grid opacity-50" />
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -226,9 +199,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ════════════════════════════════════════════════
-          FOR CANDIDATES
-      ════════════════════════════════════════════════ */}
       <section id="for-candidates" className="relative py-32">
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-1/2 left-0 w-[600px] h-[600px] bg-purple-600/5 rounded-full blur-[150px]" />
@@ -260,18 +230,8 @@ export default function Home() {
                   "Stand out before the interview stage",
                 ].map((benefit) => (
                   <li key={benefit} className="flex items-start gap-3 text-neutral-300">
-                    <svg
-                      className="w-5 h-5 text-purple-400 mt-0.5 shrink-0"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
+                    <svg className="w-5 h-5 text-purple-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                     {benefit}
                   </li>
@@ -285,7 +245,6 @@ export default function Home() {
               </Link>
             </motion.div>
 
-            {/* Visual - mock profile card */}
             <motion.div
               className="relative"
               initial={{ opacity: 0, scale: 0.9 }}
@@ -295,7 +254,6 @@ export default function Home() {
             >
               <div className="relative rounded-2xl bg-gradient-to-br from-purple-600/10 via-indigo-600/5 to-transparent p-8 border border-white/[0.06] glow">
                 <div className="relative z-10 space-y-4">
-                  {/* Video thumbnail */}
                   <div className="aspect-video rounded-xl bg-gradient-to-br from-neutral-800 to-neutral-900 flex items-center justify-center border border-white/5">
                     <div className="w-16 h-16 rounded-full bg-purple-600/20 flex items-center justify-center">
                       <svg className="w-8 h-8 text-purple-400 ml-1" fill="currentColor" viewBox="0 0 24 24">
@@ -303,25 +261,17 @@ export default function Home() {
                       </svg>
                     </div>
                   </div>
-                  {/* Candidate info */}
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600" />
                       <div>
                         <p className="font-semibold">Alex Chen</p>
-                        <p className="text-sm text-neutral-400">
-                          Sales Development Representative
-                        </p>
+                        <p className="text-sm text-neutral-400">Sales Development Representative</p>
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {["B2B SaaS", "$85K", "Remote", "4yr exp"].map((tag) => (
-                        <span
-                          key={tag}
-                          className="text-xs px-2.5 py-1 rounded-full bg-white/[0.05] border border-white/[0.08] text-neutral-400"
-                        >
-                          {tag}
-                        </span>
+                        <span key={tag} className="text-xs px-2.5 py-1 rounded-full bg-white/[0.05] border border-white/[0.08] text-neutral-400">{tag}</span>
                       ))}
                     </div>
                   </div>
@@ -332,9 +282,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ════════════════════════════════════════════════
-          FOR RECRUITERS (TEASER)
-      ════════════════════════════════════════════════ */}
       <section id="for-recruiters" className="relative py-32 bg-white/[0.005]">
         <div className="absolute inset-0 bg-grid opacity-30" />
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -358,25 +305,14 @@ export default function Home() {
             </p>
           </motion.div>
 
-          {/* Coming soon card */}
           <motion.div
             className="max-w-lg mx-auto text-center p-12 rounded-2xl border border-dashed border-white/10 bg-white/[0.02]"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
           >
-            <svg
-              className="w-12 h-12 text-indigo-400/50 mx-auto mb-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
-              />
+            <svg className="w-12 h-12 text-indigo-400/50 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
             </svg>
             <h3 className="text-xl font-semibold mb-2">Recruiter dashboard coming soon</h3>
             <p className="text-neutral-400 text-sm">
@@ -390,9 +326,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ════════════════════════════════════════════════
-          FAQ
-      ════════════════════════════════════════════════ */}
       <section className="relative py-32">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -401,52 +334,22 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
           >
-            <h2 className="text-4xl font-display font-bold tracking-tight">
-              Questions?
-            </h2>
+            <h2 className="text-4xl font-display font-bold tracking-tight">Questions?</h2>
             <p className="mt-4 text-neutral-400">Everything you need to know about Mustfind.</p>
           </motion.div>
           <div className="space-y-4">
             {[
-              {
-                q: "Is it really free for candidates?",
-                a: "Yes. Creating your profile, recording your video, and being discovered by recruiters is completely free. We'll eventually offer premium features, but the core is always free.",
-              },
-              {
-                q: "Can my current employer see my profile?",
-                a: "Absolutely not. You can block your current employer (and any company you want) from seeing your profile. We take privacy seriously.",
-              },
-              {
-                q: "How long should my video be?",
-                a: "30-60 seconds is the sweet spot. Short enough for recruiters to watch, long enough to show who you are. You can retake as many times as you want.",
-              },
-              {
-                q: "What kind of roles is this best for?",
-                a: "Any role where communication, presence, and personality matter — sales, customer success, hospitality, retail, and early career roles. If a recruiter cares about who you are, not just what you've done, this is for you.",
-              },
-              {
-                q: "When will recruiter features be available?",
-                a: "We're building them now. Right now we're focused on getting great candidates on the platform first. Recruiters will be able to browse, filter, and reach out soon.",
-              },
+              { q: "Is it really free for candidates?", a: "Yes. Creating your profile, recording your video, and being discovered by recruiters is completely free. We'll eventually offer premium features, but the core is always free." },
+              { q: "Can my current employer see my profile?", a: "Absolutely not. You can block your current employer (and any company you want) from seeing your profile. We take privacy seriously." },
+              { q: "How long should my video be?", a: "30-60 seconds is the sweet spot. Short enough for recruiters to watch, long enough to show who you are. You can retake as many times as you want." },
+              { q: "What kind of roles is this best for?", a: "Any role where communication, presence, and personality matter — sales, customer success, hospitality, retail, and early career roles. If a recruiter cares about who you are, not just what you've done, this is for you." },
+              { q: "When will recruiter features be available?", a: "We're building them now. Right now we're focused on getting great candidates on the platform first. Recruiters will be able to browse, filter, and reach out soon." },
             ].map((faq, i) => (
-              <details
-                key={i}
-                className="group rounded-xl bg-white/[0.02] border border-white/[0.06] open:border-purple-500/20 transition-all duration-300"
-              >
+              <details key={i} className="group rounded-xl bg-white/[0.02] border border-white/[0.06] open:border-purple-500/20 transition-all duration-300">
                 <summary className="flex items-center justify-between px-6 py-5 cursor-pointer list-none">
                   <span className="font-medium text-sm">{faq.q}</span>
-                  <svg
-                    className="w-4 h-4 text-neutral-500 group-open:rotate-180 transition-transform duration-200"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
+                  <svg className="w-4 h-4 text-neutral-500 group-open:rotate-180 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </summary>
                 <div className="px-6 pb-5">
@@ -458,9 +361,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ════════════════════════════════════════════════
-          FINAL CTA
-      ════════════════════════════════════════════════ */}
       <section className="relative py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-purple-600/5 via-transparent to-transparent" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[150px]" />
@@ -470,29 +370,15 @@ export default function Home() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
         >
-          <h2 className="text-4xl sm:text-5xl font-display font-bold tracking-tight leading-tight">
-            Ready to be seen?
-          </h2>
-          <p className="mt-6 text-lg text-neutral-400 max-w-lg mx-auto">
-            Take 3 minutes. Record your profile. Let the right opportunity find you.
-          </p>
+          <h2 className="text-4xl sm:text-5xl font-display font-bold tracking-tight leading-tight">Ready to be seen?</h2>
+          <p className="mt-6 text-lg text-neutral-400 max-w-lg mx-auto">Take 3 minutes. Record your profile. Let the right opportunity find you.</p>
           <Link
             href="/getting-started"
             className="mt-10 inline-flex items-center gap-2 px-10 py-5 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold text-lg hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-300"
           >
             Create your profile
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 8l4 4m0 0l-4 4m4-4H3"
-              />
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
           </Link>
         </motion.div>
