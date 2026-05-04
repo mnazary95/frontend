@@ -1,15 +1,17 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, type Variants } from "framer-motion";
 import Link from "next/link";
 import { useRef } from "react";
 
-const fadeUp = {
+const easeOut = [0.16, 1, 0.3, 1] as const;
+
+const fadeUp: Variants = {
   hidden: { opacity: 0, y: 30 },
   visible: (i: number = 0) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
+    transition: { duration: 0.6, delay: i * 0.1, ease: easeOut },
   }),
 };
 
