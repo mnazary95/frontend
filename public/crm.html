@@ -1,23 +1,40 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>JPRO CRM v18.1</title>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>JPRO CRM v18.2</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0f0f1a;color:#ddd;overflow:hidden;height:100vh}
 #map{width:100%;height:100%}
-#search{flex:1;padding:6px 10px;background:#1a1a2e;border:1px solid #333;color:#ddd;border-radius:4px;font-size:13px;min-width:0}
-#indFilter,#cityFilter,#statusFilter,#scheduleFilter{padding:6px 8px;background:#1a1a2e;border:1px solid #333;color:#ddd;border-radius:4px;font-size:12px;max-width:160px;min-width:80px}
-#controls{position:absolute;top:10px;left:10px;right:10px;z-index:1000;display:flex;gap:5px;flex-wrap:wrap;align-items:center;background:rgba(15,15,26,0.95);padding:8px;border-radius:8px;border:1px solid #2a2a3e}
-#counter{font-size:11px;color:#888;white-space:nowrap;margin:0 4px}
-#schedBadge{display:none;font-size:11px;padding:4px 8px;border-radius:4px;white-space:nowrap;background:#27ae60;color:#fff}
-#btnClearSched{display:none;background:#c0392b;color:#fff;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:12px;white-space:nowrap}
-#restoreHiddenBtn{display:none;background:#7f8c8d;color:#fff;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:12px;white-space:nowrap}
-.btn-reset{padding:4px 8px;background:#666;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px}
+
+/* CONTROLS - stacked layout */
+#controls{position:absolute;top:8px;left:8px;right:8px;z-index:1000;background:rgba(15,15,26,0.96);border-radius:10px;border:1px solid #2a2a3e;overflow:hidden}
+#controls-row1{display:flex;gap:6px;padding:8px 8px 4px;align-items:center}
+#controls-row2{display:flex;gap:5px;padding:4px 8px 8px;align-items:center;flex-wrap:wrap}
+
+#search{flex:1;padding:8px 10px;background:#1a1a2e;border:1px solid #333;color:#ddd;border-radius:6px;font-size:14px;min-width:0}
+#indFilter,#cityFilter,#statusFilter,#scheduleFilter{padding:8px 6px;background:#1a1a2e;border:1px solid #333;color:#ddd;border-radius:6px;font-size:12px;max-width:130px;min-width:70px}
+#scheduleFilter{max-width:150px}
+
+#counter{font-size:11px;color:#888;white-space:nowrap;margin-left:auto;padding:4px 6px}
+
+.ctrl-btn{padding:7px 10px;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:12px;white-space:nowrap;min-height:34px;display:inline-flex;align-items:center;gap:4px}
+.btn-clear{background:#c0392b;color:#fff;display:none}
+.btn-reset{background:#555;color:#fff}
+.btn-restore{background:#7f8c8d;color:#fff;display:none}
+.btn-csv{background:#3498db;color:#fff}
+.btn-trip-btn{background:#2a2a3e;color:#aaa;font-weight:400}
+
+#schedBadge{font-size:11px;padding:6px 8px;border-radius:6px;white-space:nowrap;display:none}
+#schedBadge.active{background:#27ae60;color:#fff}
+
 #legend{position:absolute;bottom:10px;left:10px;z-index:1000;background:rgba(15,15,26,0.95);padding:8px 10px;border-radius:8px;border:1px solid #2a2a3e;font-size:11px;max-height:200px;overflow-y:auto;max-width:220px}
 .li{display:flex;align-items:center;gap:6px;padding:2px 0;color:#aaa}.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-#tripBadge{display:none;position:absolute;top:60px;left:10px;z-index:1000;background:#f39c12;color:#1a1a2e;padding:6px 10px;border-radius:6px;font-weight:bold;font-size:12px;cursor:pointer}
+
+#tripBadge{display:block;position:absolute;top:100px;left:50%;transform:translateX(-50%);z-index:1000;padding:8px 16px;border-radius:20px;font-weight:bold;font-size:13px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.4)}
+
 #load{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,15,26,0.9);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .spinner{border:3px solid #333;border-top:3px solid #f39c12;border-radius:50%;width:40px;height:40px;animation:spin 0.8s linear infinite;margin-bottom:10px}
 @keyframes spin{to{transform:rotate(360deg)}}
 #errMsg{display:none;color:#e74c3c;font-size:12px;max-width:300px;text-align:center;white-space:pre-wrap}
+
 #panel{position:fixed;top:0;right:0;width:100%;max-width:420px;height:100%;background:#1a1a2e;z-index:2000;transform:translateX(100%);transition:transform 0.3s;overflow-y:auto;display:flex;flex-direction:column}
 #panel.open{transform:translateX(0)}
 .panel-header{display:flex;justify-content:space-between;align-items:center;padding:12px 15px;border-bottom:1px solid #2a2a3e;position:sticky;top:0;background:#1a1a2e;z-index:1}
@@ -30,42 +47,42 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 #panelBody .field label{display:block;color:#888;font-size:11px;margin-bottom:2px}
 #panelBody .phone{color:#3498db;text-decoration:none;font-size:14px}
 .status-bar{display:flex;gap:5px;margin-bottom:12px}
-.status-bar button{flex:1;padding:6px;border:1px solid #444;border-radius:4px;background:transparent;color:#aaa;cursor:pointer;font-size:11px;font-family:inherit}
+.status-bar button{flex:1;padding:8px;border:1px solid #444;border-radius:6px;background:transparent;color:#aaa;cursor:pointer;font-size:12px;font-family:inherit}
 .status-bar button.active{background:#f39c12;border-color:#f39c12;color:#1a1a2e;font-weight:600}
-.btn-hide{display:block;width:100%;padding:8px;background:#c0392b;color:#fff;border:none;border-radius:4px;cursor:pointer;margin:8px 0}
-.btn-trip{display:block;width:100%;padding:8px;text-align:center;border:none;border-radius:4px;cursor:pointer;font-weight:600;margin:8px 0}
+.btn-hide{display:block;width:100%;padding:10px;background:#c0392b;color:#fff;border:none;border-radius:6px;cursor:pointer;margin:8px 0;font-size:14px}
+.btn-trip{display:block;width:100%;padding:10px;text-align:center;border:none;border-radius:6px;cursor:pointer;font-weight:600;margin:8px 0;font-size:14px}
 .btn-trip.add{background:#27ae60;color:#fff}.btn-trip.remove{background:#c0392b;color:#fff}
 .visits{margin-top:15px}.visits h3{font-size:14px;margin-bottom:8px}
-.visit-entry{background:#252540;padding:8px;border-radius:4px;margin-bottom:6px;position:relative}
-.visit-entry .del{position:absolute;top:4px;right:4px;background:#c0392b;color:#fff;border:none;border-radius:3px;cursor:pointer;font-size:12px;width:20px;height:20px;line-height:1}
+.visit-entry{background:#252540;padding:10px;border-radius:6px;margin-bottom:6px;position:relative}
+.visit-entry .del{position:absolute;top:4px;right:4px;background:#c0392b;color:#fff;border:none;border-radius:3px;cursor:pointer;font-size:12px;width:22px;height:22px;line-height:1}
 .visit-entry .vt{font-size:11px;color:#f39c12}.visit-entry .vn{margin-top:3px;font-size:13px}
 .add-visit{margin-top:10px;display:flex;flex-direction:column;gap:6px}
-.add-visit textarea{width:100%;min-height:50px;padding:8px;background:#252540;border:1px solid #333;color:#ddd;border-radius:4px;font-family:inherit;font-size:13px}
-.add-visit button{padding:8px;background:#27ae60;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:600}
+.add-visit textarea{width:100%;min-height:50px;padding:10px;background:#252540;border:1px solid #333;color:#ddd;border-radius:6px;font-family:inherit;font-size:14px}
+.add-visit button{padding:10px;background:#27ae60;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:14px}
 .schedule-section{margin:10px 0;padding:10px;background:#252540;border-radius:6px}
 .schedule-section label{display:block;color:#888;font-size:11px;margin-bottom:6px}
 .schedule-row{display:flex;gap:6px}
-.sched-chip{display:inline-block;background:#2a2a3e;padding:4px 8px;border-radius:4px;margin:0;font-size:11px;color:#ddd}
-#tripPanel{position:fixed;bottom:0;left:0;right:0;background:#1a1a2e;z-index:1500;transform:translateY(100%);transition:transform 0.3s;max-height:70vh;overflow-y:auto;border-radius:12px 12px 0 0;box-shadow:0 -4px 20px rgba(0,0,0,0.5)}
+.sched-chip{display:inline-block;background:#2a2a3e;padding:5px 10px;border-radius:4px;margin:0;font-size:12px;color:#ddd}
+#tripPanel{position:fixed;bottom:0;left:0;right:0;background:#1a1a2e;z-index:1500;transform:translateY(100%);transition:transform 0.3s;max-height:70vh;overflow-y:auto;border-radius:14px 14px 0 0;box-shadow:0 -4px 20px rgba(0,0,0,0.5)}
 #tripPanel.open{transform:translateY(0)}
 .trip-header{display:flex;gap:8px;padding:12px 15px;border-bottom:1px solid #2a2a3e}
-.trip-header input{flex:1;padding:8px;background:#252540;border:1px solid #333;color:#ddd;border-radius:4px;font-size:13px;font-family:inherit}
+.trip-header input{flex:1;padding:10px;background:#252540;border:1px solid #333;color:#ddd;border-radius:6px;font-size:14px;font-family:inherit}
 .trip-list{display:flex;flex-direction:column;gap:6px;padding:0 15px}
-.trip-stop{display:flex;align-items:center;gap:8px;background:#252540;padding:8px 10px;border-radius:6px}
-.trip-grip{cursor:grab;color:#666;font-size:18px;user-select:none;touch-action:none}
-.trip-num{background:#f39c12;color:#1a1a2e;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px;flex-shrink:0}
+.trip-stop{display:flex;align-items:center;gap:8px;background:#252540;padding:10px 12px;border-radius:8px}
+.trip-grip{cursor:grab;color:#666;font-size:20px;user-select:none;touch-action:none;padding:4px}
+.trip-num{background:#f39c12;color:#1a1a2e;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:13px;flex-shrink:0}
 .trip-info{flex:1}.trip-name{font-weight:600;font-size:14px}.trip-meta{font-size:11px;color:#888}.trip-dist{font-size:10px;color:#f39c12}
-.trip-remove{background:#c0392b;color:#fff;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:12px;flex-shrink:0}
+.trip-remove{background:#c0392b;color:#fff;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:14px;flex-shrink:0}
 .trip-summary{padding:10px 15px;font-weight:bold;color:#f39c12;font-size:13px}
-.trip-buttons{display:flex;gap:6px;flex-wrap:wrap;padding:0 15px 10px}.trip-buttons button{padding:6px 12px;border:none;border-radius:4px;cursor:pointer;font-weight:600;font-size:12px}
+.trip-buttons{display:flex;gap:6px;flex-wrap:wrap;padding:0 15px 10px}.trip-buttons button{padding:8px 14px;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px}
 .trip-buttons button:first-child{background:#f39c12;color:#1a1a2e}.trip-buttons button:nth-child(2){background:#27ae60;color:#fff}.trip-buttons button:nth-child(3){background:#3498db;color:#fff}.trip-buttons .ghost{background:transparent;color:#c0392b}
 .saved-trips-section{margin:10px 15px 15px}.saved-trips-section h3{font-size:14px;color:#888;margin-bottom:8px}
 .saved-list{display:flex;flex-direction:column;gap:6px}
-.saved-trip{display:flex;align-items:center;justify-content:space-between;background:#252540;padding:8px 10px;border-radius:4px}
+.saved-trip{display:flex;align-items:center;justify-content:space-between;background:#252540;padding:10px 12px;border-radius:6px}
 .saved-name{font-weight:600;font-size:13px}.saved-meta{font-size:11px;color:#888}
-.saved-actions button{padding:4px 8px;border:none;border-radius:3px;cursor:pointer;font-size:14px}
+.saved-actions button{padding:6px 10px;border:none;border-radius:4px;cursor:pointer;font-size:16px;min-width:36px}
 .saved-actions button:first-child{background:#3498db;color:#fff}.saved-actions button:last-child{background:#c0392b;color:#fff}
-@media(max-width:600px){#controls{padding:6px}#indFilter,#cityFilter,#statusFilter,#scheduleFilter{max-width:100px;font-size:11px}#panel{max-width:100%}}
+@media(max-width:420px){#controls{padding:0;border-radius:0;top:0;left:0;right:0}#controls-row1,#controls-row2{padding:6px}#indFilter,#cityFilter,#statusFilter,#scheduleFilter{padding:7px 4px;font-size:11px;max-width:80px}#panel{max-width:100%}}
 
 </style>
 <style>
@@ -735,17 +752,21 @@ svg.leaflet-image-layer.leaflet-interactive path {
 </head><body>
 <div id="load"><div class="spinner"></div><h2 style="color:#f39c12">Loading...</h2><div id="errMsg"></div></div>
 <div id="controls">
-<input type="search" id="search" placeholder="Search...">
-<select id="indFilter"><option value="">All Industries</option></select>
-<select id="cityFilter"><option value="">All Cities</option></select>
-<select id="statusFilter"><option value="all">All Status</option><option value="0">Not Visited</option><option value="1">Contacted</option><option value="2">Visited</option></select>
-<input type="date" id="scheduleFilter" style="padding:6px 8px;background:#1a1a2e;border:1px solid #333;color:#ddd;border-radius:4px;font-size:12px;max-width:160px;color-scheme:dark">
+<div id="controls-row1">
+<input type="search" id="search" placeholder="🔍 Search leads...">
+<select id="indFilter"><option value="">🏭 All</option></select>
+<select id="cityFilter"><option value="">🏙️ All</option></select>
+</div>
+<div id="controls-row2">
+<select id="statusFilter"><option value="all">📊 All Status</option><option value="0">Not Visited</option><option value="1">Contacted</option><option value="2">Visited</option></select>
+<input type="date" id="scheduleFilter" style="color-scheme:dark">
 <span id="schedBadge"></span>
-<button id="btnClearSched" onclick="clearScheduleFilter()">✕ Clear</button>
-<button class="btn-reset" onclick="resetFilters()">Reset</button>
-<button id="restoreHiddenBtn" onclick="restoreHidden()">🔄 Restore</button>
-<button onclick="exportCSV('all')" style="padding:4px 8px;background:#3498db;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px;white-space:nowrap">📥 CSV</button>
-<span id="counter">Loading...</span>
+<button id="btnClearSched" class="ctrl-btn btn-clear" onclick="clearScheduleFilter()">✕</button>
+<button class="ctrl-btn btn-reset" onclick="resetFilters()">↺ Reset</button>
+<button id="restoreHiddenBtn" class="ctrl-btn btn-restore" onclick="restoreHidden()">🔄 Restore</button>
+<button class="ctrl-btn btn-csv" onclick="exportCSV('all')">📥 CSV</button>
+<span id="counter"></span>
+</div>
 </div>
 <div id="tripBadge" onclick="toggleTripPanel()">🗺️ Trip Planner</div>
 <div id="map"></div>
