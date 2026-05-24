@@ -158,8 +158,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 #calTabTop button.active{background:#f39c12;color:#000;border-color:#f39c12;font-weight:700}
 #calTabTop span{color:#f39c12;font-weight:600;font-size:14px;flex:1;text-align:center}
 #calTabBody{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:6px 10px}
-
-/* Calendar day list */
 .cal-day-title{color:#f39c12;font-size:16px;font-weight:700;padding:8px 0 4px;border-bottom:2px solid #2a2a3e;margin-bottom:4px}
 .cal-day-sub{font-size:11px;color:#888;margin-bottom:8px}
 .cal-item{display:flex;align-items:center;padding:10px 8px;background:#1a1a2e;border-radius:8px;margin-bottom:4px;cursor:pointer;gap:8px;border-left:4px solid #666}
@@ -169,8 +167,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 .cal-item .ci-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cal-item .ci-meta{font-size:11px;color:#888}
 .cal-item .ci-stat{font-size:10px;font-weight:600;padding:2px 6px;border-radius:8px;flex-shrink:0}
-
-/* Calendar week view */
 .cal-week-row{display:flex;gap:4px;margin-bottom:8px}
 .cal-week-day{flex:1;background:#1a1a2e;border-radius:8px;padding:8px 4px;text-align:center;cursor:pointer;border:2px solid transparent;transition:border-color 0.15s}
 .cal-week-day:hover{background:#252540}
@@ -999,7 +995,6 @@ function buildLegend(){try{var h="",c={};LEADS.forEach(function(l){c[l[1]]=(c[l[
 function showError(msg){try{var d=document.getElementById("load");d.querySelector("h2").textContent="\u26a0 Error";d.querySelector(".spinner").style.display="none";document.getElementById("errMsg").style.display="block";document.getElementById("errMsg").textContent=msg+"\nTry refreshing.";}catch(e2){console.error(msg);}}
 window.onerror=function(m,u,l){showError("L"+l+": "+m);return false;};
 document.addEventListener("DOMContentLoaded",function(){init();});
-function escHtml(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 var currentTab='map';
 
 function switchTab(tab){
@@ -1012,7 +1007,6 @@ function switchTab(tab){
   else if(tab==='tasks')btns[3].classList.add('active');
   else if(tab==='more')btns[4].classList.add('active');
   
-  // hide alternate views
   var lv=document.getElementById('leadsView');if(lv)lv.classList.remove('open');
   var cv=document.getElementById('calTabView');if(cv)cv.classList.remove('open');
   document.getElementById('calPanel').classList.remove('open');
@@ -1060,13 +1054,13 @@ function populateLeadsFilters(){
   ind.innerHTML='<option value="">All Industries</option>';
   var inds=[];for(var k in iColors)inds.push(k);inds.sort();
   for(var i=0;i<inds.length;i++){
-    ind.innerHTML+='<option value="'+escHtml(inds[i])+'"'+(inds[i]===indV?' selected':'')+'>'+escHtml(inds[i])+'</option>';
+    ind.innerHTML+='<option value="'+esc(inds[i])+'"'+(inds[i]===indV?' selected':'')+'>'+esc(inds[i])+'</option>';
   }
   var cities={};for(var i=0;i<LEADS.length;i++){var c=LEADS[i][2];if(c)cities[c]=1;}
   var csorted=Object.keys(cities).sort();
   cit.innerHTML='<option value="">All Cities</option>';
   for(var i=0;i<csorted.length;i++){
-    cit.innerHTML+='<option value="'+escHtml(csorted[i])+'"'+(csorted[i]===citV?' selected':'')+'>'+escHtml(csorted[i])+'</option>';
+    cit.innerHTML+='<option value="'+esc(csorted[i])+'"'+(csorted[i]===citV?' selected':'')+'>'+esc(csorted[i])+'</option>';
   }
 }
 
@@ -1075,23 +1069,22 @@ function populateLeadsTable(){
   var indF=document.getElementById('ltIndustry').value;
   var cityF=document.getElementById('ltCity').value;
   var statF=document.getElementById('ltStatus').value;
-  var sched=loadSchedule();
   var tbody=document.getElementById('leadsBody');
   if(!tbody)return;
   var rows=[];var count=0;
   for(var i=0;i<LEADS.length;i++){
     var l=LEADS[i],name=l[0],ind=l[1],city=l[2],ph=l[4];
-    if(hiddenSet.has(i))continue;
+    if(hidden.has(i))continue;
     if(q&&name.toLowerCase().indexOf(q)<0&&city.toLowerCase().indexOf(q)<0&&ind.toLowerCase().indexOf(q)<0)continue;
     if(indF&&ind!==indF)continue;
     if(cityF&&city!==cityF)continue;
-    var vs=getVisitStatus(i);var st=vs[0];
+    var vs=visits['l'+i]||{status:0};var st=vs.status;
     if(statF==='scheduled'){
-      var f=false;for(var d in sched){if(sched[d].indexOf(i)>=0){f=true;break;}}
+      var f=false;for(var d in schedule){if(schedule[d].indexOf(i)>=0){f=true;break;}}
       if(!f)continue;
     }else if(statF&&statF!=='all'&&statF!=='scheduled'){if(st!==parseInt(statF))continue;}
     var statusLabels=['⏳ Not Visited','📞 Contacted','✅ Visited'];
-    rows.push('<tr onclick="switchTab(\'map\');showPanel('+i+')"><td class="lt-name">'+escHtml(name)+'</td><td style="color:#f39c12">'+escHtml(ind)+'</td><td>'+escHtml(city)+'</td><td style="color:#aaa">'+(ph?escHtml(ph):'—')+'</td><td><span class="lt-stat lt-stat-'+st+'">'+statusLabels[st]+'</span></td></tr>');
+    rows.push('<tr onclick="switchTab(\'map\');openLead('+i+')"><td class="lt-name">'+esc(name)+'</td><td style="color:#f39c12">'+esc(ind)+'</td><td>'+esc(city)+'</td><td style="color:#aaa">'+(ph?esc(ph):'\u2014')+'</td><td><span class="lt-stat lt-stat-'+st+'">'+statusLabels[st]+'</span></td></tr>');
     count++;
   }
   tbody.innerHTML=rows.join('');
@@ -1121,57 +1114,57 @@ function calNav(dir){
 function renderCalView(){
   var body=document.getElementById('calTabBody');
   if(!body)return;
-  var sched=loadSchedule();
-  var comp=getCompletedTasks_();
-  
-  if(calViewMode==='day'){
-    renderDayView(body,sched,comp);
-  }else if(calViewMode==='week'){
-    renderWeekView(body,sched,comp);
-  }else{
-    renderMonthView(body,sched,comp);
-  }
+  if(calViewMode==='day')renderDayView(body);
+  else if(calViewMode==='week')renderWeekView(body);
+  else renderMonthView(body);
 }
 
-function renderDayView(body,sched,comp){
+function fmtISODate(d){return d.toISOString().split('T')[0];}
+function fmtPretty(ds){
+  var parts=ds.split('-');
+  var mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return mn[parseInt(parts[1])-1]+' '+parseInt(parts[2])+', '+parts[0];
+}
+
+function renderDayView(body){
+  // Use the global 'schedule' and 'taskDone' variables
   var d=fmtISODate(calAnchor);
   var label=document.getElementById('calViewLabel');
   var dn=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   label.textContent=dn[calAnchor.getDay()]+', '+mn[calAnchor.getMonth()]+' '+calAnchor.getDate()+', '+calAnchor.getFullYear();
   
-  var leads=sched[d]||[];
-  var done=comp[d]||{};
+  var stops=schedule[d]||[];
+  var done=taskDone[d]||[];
   var html=[];
-  if(leads.length===0){
+  if(stops.length===0){
     html.push('<div class="cal-week-no">No stops scheduled for this day</div>');
   }else{
     var complete=0;
-    for(var i=0;i<leads.length;i++){if(done[leads[i]])complete++;}
-    html.push('<div class="cal-day-title">'+fmtDatePretty(d)+'</div>');
-    html.push('<div class="cal-day-sub">'+complete+'/'+leads.length+' completed</div>');
-    for(var i=0;i<leads.length;i++){
-      var idx=leads[i];
+    for(var i=0;i<stops.length;i++){if(done.indexOf(stops[i])>=0)complete++;}
+    html.push('<div class="cal-day-title">'+fmtPretty(d)+'</div>');
+    html.push('<div class="cal-day-sub">'+complete+'/'+stops.length+' completed</div>');
+    for(var i=0;i<stops.length;i++){
+      var idx=stops[i];
       if(idx<0||idx>=LEADS.length)continue;
       var l=LEADS[idx],name=l[0],ind=l[1],city=l[2];
       var ic=iColors[ind]||'#666';
-      var vs=getVisitStatus(idx);var st=vs[0];
+      var vs=visits['l'+idx]||{status:0};var st=vs.status;
       var stLabels=['⏳ Not Visited','📞 Contacted','✅ Visited'];
-      var checked=done[idx]?'✅':'⬜';
-      html.push('<div class="cal-item" style="border-left-color:'+ic+'" onclick="switchTab(\'map\');showPanel('+idx+')"><span class="ci-dot" style="background:'+ic+'"></span><div class="ci-info"><div class="ci-name">'+checked+' '+escHtml(name)+'</div><div class="ci-meta">'+escHtml(ind)+' • '+escHtml(city)+'</div></div><span class="ci-stat lt-stat-'+st+'">'+stLabels[st]+'</span></div>');
+      var checked=done.indexOf(idx)>=0?'✅':'⬜';
+      html.push('<div class="cal-item" style="border-left-color:'+ic+'" onclick="switchTab(\'map\');openLead('+idx+')"><span class="ci-dot" style="background:'+ic+'"></span><div class="ci-info"><div class="ci-name">'+checked+' '+esc(name)+'</div><div class="ci-meta">'+esc(ind)+' \u2022 '+esc(city)+'</div></div><span class="ci-stat lt-stat-'+st+'">'+stLabels[st]+'</span></div>');
     }
   }
   body.innerHTML=html.join('');
 }
 
-function renderWeekView(body,sched,comp){
+function renderWeekView(body){
   var label=document.getElementById('calViewLabel');
-  // find monday of week
   var monday=new Date(calAnchor);
   monday.setDate(monday.getDate()-((monday.getDay()+6)%7));
   var sunday=new Date(monday);sunday.setDate(sunday.getDate()+6);
   var mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  label.textContent=mn[monday.getMonth()]+' '+monday.getDate()+' – '+mn[sunday.getMonth()]+' '+sunday.getDate()+', '+sunday.getFullYear();
+  label.textContent=mn[monday.getMonth()]+' '+monday.getDate()+'\u2013'+mn[sunday.getMonth()]+' '+sunday.getDate()+', '+sunday.getFullYear();
   
   var today=fmtISODate(new Date());
   var dn=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
@@ -1179,36 +1172,34 @@ function renderWeekView(body,sched,comp){
   for(var i=0;i<7;i++){
     var day=new Date(monday);day.setDate(day.getDate()+i);
     var ds=fmtISODate(day);
-    var dayLeads=sched[ds]||[];
-    var dayDone=comp[ds]||{};
+    var dayStops=schedule[ds]||[];
+    var dayDone=taskDone[ds]||[];
     var doneCount=0;
-    for(var j=0;j<dayLeads.length;j++){if(dayDone[dayLeads[j]])doneCount++;}
-    var total=dayLeads.length;
+    for(var j=0;j<dayStops.length;j++){if(dayDone.indexOf(dayStops[j])>=0)doneCount++;}
+    var total=dayStops.length;
     var pct=total?Math.round(doneCount/total*100):0;
     var cls=['cal-week-day'];
     if(ds===today)cls.push('today');
     if(ds===fmtISODate(calAnchor))cls.push('active');
-    html.push('<div class="'+cls.join(' ')+'" onclick="calAnchor=new Date(\''+ds+'\');setCalView(\'day\')"><div class="wd-name">'+dn[i]+'</div><div class="wd-date">'+day.getDate()+'</div>'+(total?'<div class="wd-count">'+total+' stop'+(total!==1?'s':'')+'</div><div class="wd-done">'+doneCount+' done</div><div class="wd-bar"><div class="wd-bar-fill" style="width:'+pct+'%"></div></div>':'<div class="wd-count" style="color:#555">—</div>')+'</div>');
+    html.push('<div class="'+cls.join(' ')+'" onclick="calAnchor=new Date(\''+ds+'\');setCalView(\'day\')"><div class="wd-name">'+dn[i]+'</div><div class="wd-date">'+day.getDate()+'</div>'+(total?'<div class="wd-count">'+total+' stop'+(total!==1?'s':'')+'</div><div class="wd-done">'+doneCount+' done</div><div class="wd-bar"><div class="wd-bar-fill" style="width:'+pct+'%"></div></div>':'<div class="wd-count" style="color:#555">\u2014</div>')+'</div>');
   }
-  html.push('</div>');
-  html.push('<div style="margin-top:12px">');
+  html.push('</div><div style="margin-top:12px">');
   
-  // List all leads for the week
   var shown=false;
   for(var i=0;i<7;i++){
     var day=new Date(monday);day.setDate(day.getDate()+i);
     var ds=fmtISODate(day);
-    var dayLeads=sched[ds]||[];
-    if(dayLeads.length===0)continue;
+    var dayStops=schedule[ds]||[];
+    if(dayStops.length===0)continue;
     shown=true;
-    var dayDone=comp[ds]||{};
-    html.push('<div style="font-weight:700;color:#f39c12;margin:8px 0 4px;font-size:12px">'+fmtDatePretty(ds)+'</div>');
-    for(var j=0;j<dayLeads.length;j++){
-      var idx=dayLeads[j];
+    var dayDone=taskDone[ds]||[];
+    html.push('<div style="font-weight:700;color:#f39c12;margin:8px 0 4px;font-size:12px">'+fmtPretty(ds)+'</div>');
+    for(var j=0;j<dayStops.length;j++){
+      var idx=dayStops[j];
       if(idx<0||idx>=LEADS.length)continue;
       var l=LEADS[idx],name=l[0],ind=l[1],city=l[2];
       var ic=iColors[ind]||'#666';
-      html.push('<div class="cal-item" style="border-left-color:'+ic+';margin-bottom:2px" onclick="switchTab(\'map\');showPanel('+idx+')"><span class="ci-dot" style="background:'+ic+'"></span><div class="ci-info"><div class="ci-name">'+(dayDone[idx]?'✅ ':'⬜ ')+escHtml(name)+'</div><div class="ci-meta">'+escHtml(ind)+' • '+escHtml(city)+'</div></div></div>');
+      html.push('<div class="cal-item" style="border-left-color:'+ic+';margin-bottom:2px" onclick="switchTab(\'map\');openLead('+idx+')"><span class="ci-dot" style="background:'+ic+'"></span><div class="ci-info"><div class="ci-name">'+(dayDone.indexOf(idx)>=0?'✅ ':'⬜ ')+esc(name)+'</div><div class="ci-meta">'+esc(ind)+' \u2022 '+esc(city)+'</div></div></div>');
     }
   }
   if(!shown)html.push('<div class="cal-week-no">No stops scheduled this week</div>');
@@ -1216,7 +1207,7 @@ function renderWeekView(body,sched,comp){
   body.innerHTML=html.join('');
 }
 
-function renderMonthView(body,sched,comp){
+function renderMonthView(body){
   var label=document.getElementById('calViewLabel');
   var mn=['January','February','March','April','May','June','July','August','September','October','November','December'];
   label.textContent=mn[calAnchor.getMonth()]+' '+calAnchor.getFullYear();
@@ -1224,33 +1215,30 @@ function renderMonthView(body,sched,comp){
   var today=fmtISODate(new Date());
   var year=calAnchor.getFullYear(), month=calAnchor.getMonth();
   var firstDay=new Date(year,month,1);
-  var startDow=(firstDay.getDay()+6)%7; // Mon=0
+  var startDow=(firstDay.getDay()+6)%7;
   var daysInMonth=new Date(year,month+1,0).getDate();
   
   var dn=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   var html=['<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center">'];
-  // Day headers
   for(var i=0;i<7;i++)html.push('<div style="font-size:10px;color:#888;padding:4px 0">'+dn[i]+'</div>');
-  // Empty cells before 1st
   for(var i=0;i<startDow;i++)html.push('<div></div>');
-  // Days
   for(var d=1;d<=daysInMonth;d++){
     var date=new Date(year,month,d);
     var ds=fmtISODate(date);
-    var dayLeads=sched[ds]||[];
-    var dayDone=comp[ds]||{};
+    var dayStops=schedule[ds]||[];
+    var dayDone=taskDone[ds]||[];
     var doneCount=0;
-    for(var j=0;j<dayLeads.length;j++){if(dayDone[dayLeads[j]])doneCount++;}
+    for(var j=0;j<dayStops.length;j++){if(dayDone.indexOf(dayStops[j])>=0)doneCount++;}
     var bg='#1a1a2e';
     var border='';
     if(ds===today)border='border:1px solid #f39c12;';
     if(ds===fmtISODate(calAnchor))bg='rgba(243,156,18,0.15)';
     var style='background:'+bg+';padding:6px 2px;border-radius:6px;cursor:pointer;'+border;
     var dots='';
-    if(dayLeads.length>0){
-      var pct=Math.round(doneCount/dayLeads.length*100);
+    if(dayStops.length>0){
+      var pct=Math.round(doneCount/dayStops.length*100);
       var clr=pct===100?'#27ae60':'#f39c12';
-      dots='<div style="margin-top:2px"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:'+clr+';margin:1px"></span><span style="font-size:9px;color:'+clr+'">'+doneCount+'/'+dayLeads.length+'</span></div>';
+      dots='<div style="margin-top:2px"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:'+clr+';margin:1px"></span><span style="font-size:9px;color:'+clr+'">'+doneCount+'/'+dayStops.length+'</span></div>';
     }
     html.push('<div style="'+style+'" onclick="calAnchor=new Date(\''+ds+'\');setCalView(\'day\')"><div style="font-size:13px;font-weight:700;color:#fff">'+d+'</div>'+dots+'</div>');
   }
@@ -1258,30 +1246,22 @@ function renderMonthView(body,sched,comp){
   body.innerHTML=html.join('');
 }
 
-function fmtISODate(d){return d.toISOString().split('T')[0];}
-function fmtDatePretty(ds){
-  var parts=ds.split('-');
-  var mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  return mn[parseInt(parts[1])-1]+' '+parseInt(parts[2])+', '+parts[0];
-}
-
 /* --- MORE MENU --- */
 function showMoreMenu(){
-  var scroll=document.getElementById('leadsWrap')||document.getElementById('leadsBody');
-  if(!scroll){document.getElementById('leadsCount')&&(document.getElementById('leadsCount').textContent='');return;}
+  var wrap=document.getElementById('leadsWrap');
+  if(!wrap)return;
   document.getElementById('leadsCount').textContent='';
   var out=['<div style="padding:12px;max-width:500px;margin:0 auto">'];
   out.push('<h3 style="color:#f39c12;margin-bottom:12px">⚙️ More</h3>');
   out.push('<button style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #444;color:#ddd;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit" onclick="showHistory()">📋 Visit History</button>');
   out.push('<button style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #444;color:#ddd;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit" onclick="exportCSV()">📥 Export All Leads (CSV)</button>');
   out.push('<button style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #444;color:#ddd;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit" onclick="resetFilters();switchTab(\'map\')">↺ Reset All Filters</button>');
-  if(typeof hiddenSet!=='undefined'&&hiddenSet&&hiddenSet.size>0){
-    out.push('<button style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #e67e22;color:#e67e22;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit" onclick="restoreHidden()">🔄 Restore '+hiddenSet.size+' Hidden</button>');
+  if(hidden.size>0){
+    out.push('<button style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #e67e22;color:#e67e22;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit" onclick="restoreHidden()">🔄 Restore '+hidden.size+' Hidden</button>');
   }
-  out.push('<div style="margin-top:16px;padding:12px;background:#1a1a2e;border-radius:8px;font-size:12px;color:#888"><strong>JPRO Territory CRM v22</strong><br>Total: '+LEADS.length+' leads<br>'.concat('Industries: ')+Object.keys(iColors).length+'</div>');
+  out.push('<div style="margin-top:16px;padding:12px;background:#1a1a2e;border-radius:8px;font-size:12px;color:#888"><strong>JPRO Territory CRM v22</strong><br>Total: '+LEADS.length+' leads<br>Industries: '+Object.keys(iColors).length+'</div>');
   out.push('</div>');
-  if(scroll&&scroll.parentElement)scroll.parentElement.innerHTML=out.join('');
-  else document.getElementById('leadsWrap')&&(document.getElementById('leadsWrap').innerHTML=out.join(''));
+  wrap.innerHTML=out.join('');
 }
 
 /* --- TASK BADGE --- */
@@ -1291,15 +1271,13 @@ function updateTaskBadge(){
   var old=document.getElementById('taskBadge');
   if(old)old.remove();
   try{
-    var sched=loadSchedule();
     var today=new Date().toISOString().split('T')[0];
     var count=0;
-    for(var d in sched){
-      if(d>=today&&sched[d].length>0){
-        var comp=getCompletedTasks_();
-        var done=comp[d]||{};
-        for(var i=0;i<sched[d].length;i++){
-          if(!done[sched[d][i]])count++;
+    for(var d in schedule){
+      if(d>=today&&schedule[d].length>0){
+        var done=taskDone[d]||[];
+        for(var i=0;i<schedule[d].length;i++){
+          if(done.indexOf(schedule[d][i])<0)count++;
         }
       }
     }
@@ -1311,10 +1289,7 @@ function updateTaskBadge(){
     }
   }catch(e){}
 }
-function getCompletedTasks_(){
-  try{return JSON.parse(localStorage.jpro_completed||'{}');}catch(e){return {};}
-}
 </script>
 <script>var loadTimeout=setTimeout(function(){document.getElementById("load").querySelector("h2").textContent="Still loading...";},5000);
-setTimeout(function(){if(typeof updateTaskBadge==="function")updateTaskBadge();},500);</script>
+setTimeout(function(){if(typeof updateTaskBadge==="function")updateTaskBadge();},800);</script>
 </body></html>
