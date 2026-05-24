@@ -128,23 +128,61 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 .tab-btn .tab-label{text-transform:uppercase;letter-spacing:0.5px;font-weight:500}
 .tab-badge{position:absolute;top:1px;left:calc(50% + 2px);background:#e74c3c;color:#fff;font-size:9px;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;line-height:1}
 
-/* === LIST VIEW === */
-#listView{display:none;position:absolute;top:0;left:0;right:0;bottom:58px;z-index:998;background:#0f0f1a;overflow:hidden;flex-direction:column}
-#listView.open{display:flex}
-#listHeader{padding:8px 10px;background:rgba(15,15,26,0.98);border-bottom:1px solid #2a2a3e;flex-shrink:0}
-#listSearch{width:100%;padding:10px 12px;background:#1a1a2e;border:1px solid #333;color:#ddd;border-radius:8px;font-size:14px;font-family:inherit}
-#listScroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:6px 8px}
-#listCount{font-size:11px;color:#888;padding:4px 8px 6px}
+/* === LEAD TABLE VIEW === */
+#leadsView{display:none;position:absolute;top:0;left:0;right:0;bottom:58px;z-index:998;background:#0f0f1a;overflow:hidden;flex-direction:column}
+#leadsView.open{display:flex}
+#leadsTop{padding:8px 10px;background:rgba(15,15,26,0.98);border-bottom:1px solid #2a2a3e;flex-shrink:0}
+#leadsTop .lt-row{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+#leadsTop .lt-row:last-child{margin-bottom:0}
+#leadsTop select,#leadsTop input{flex:1;min-width:0;padding:8px 6px;background:#1a1a2e;border:1px solid #333;color:#ddd;border-radius:6px;font-size:12px;font-family:inherit}
+#leadsTop input{flex:1.5}
+#leadsTbl{width:100%;border-collapse:collapse;font-size:12px}
+#leadsTbl th{position:sticky;top:0;background:#15152a;color:#f39c12;padding:8px 6px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #2a2a3e;white-space:nowrap}
+#leadsTbl td{padding:8px 6px;border-bottom:1px solid #1a1a2e;color:#ddd;white-space:nowrap}
+#leadsTbl tr{cursor:pointer;transition:background 0.1s}
+#leadsTbl tr:hover{background:#1a1a2e}
+#leadsTbl tr:active{background:#252540}
+#leadsTbl .lt-name{font-weight:600;color:#fff;max-width:200px;overflow:hidden;text-overflow:ellipsis}
+#leadsTbl .lt-stat{font-size:10px;font-weight:600;padding:2px 6px;border-radius:8px;text-align:center}
+.lt-stat-0{background:rgba(231,76,60,0.2);color:#e74c3c}
+.lt-stat-1{background:rgba(243,156,18,0.2);color:#f39c12}
+.lt-stat-2{background:rgba(39,174,96,0.2);color:#27ae60}
+#leadsWrap{flex:1;overflow:auto;-webkit-overflow-scrolling:touch}
+#leadsCount{font-size:11px;color:#888;padding:4px 8px}
 
-.lead-card{background:#1a1a2e;border-radius:10px;padding:12px 14px;margin-bottom:6px;border-left:4px solid #666;cursor:pointer;transition:background 0.1s}
-.lead-card:active{background:#252540}
-.lead-card .lc-name{font-size:14px;font-weight:600;color:#fff;margin-bottom:3px;display:flex;align-items:center;gap:6px}
-.lead-card .lc-ind{font-size:11px;color:#f39c12;font-weight:500}
-.lead-card .lc-meta{font-size:11px;color:#888;display:flex;gap:10px;flex-wrap:wrap}
-.lead-card .lc-status{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;margin-top:4px}
-.lc-stat-0{background:rgba(231,76,60,0.2);color:#e74c3c}
-.lc-stat-1{background:rgba(243,156,18,0.2);color:#f39c12}
-.lc-stat-2{background:rgba(39,174,96,0.2);color:#27ae60}
+/* === CALENDAR TAB VIEW === */
+#calTabView{display:none;position:absolute;top:0;left:0;right:0;bottom:58px;z-index:998;background:#0f0f1a;overflow:hidden;flex-direction:column}
+#calTabView.open{display:flex}
+#calTabTop{display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(15,15,26,0.98);border-bottom:1px solid #2a2a3e;flex-shrink:0}
+#calTabTop button{background:#1a1a2e;border:1px solid #333;color:#ddd;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit}
+#calTabTop button.active{background:#f39c12;color:#000;border-color:#f39c12;font-weight:700}
+#calTabTop span{color:#f39c12;font-weight:600;font-size:14px;flex:1;text-align:center}
+#calTabBody{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:6px 10px}
+
+/* Calendar day list */
+.cal-day-title{color:#f39c12;font-size:16px;font-weight:700;padding:8px 0 4px;border-bottom:2px solid #2a2a3e;margin-bottom:4px}
+.cal-day-sub{font-size:11px;color:#888;margin-bottom:8px}
+.cal-item{display:flex;align-items:center;padding:10px 8px;background:#1a1a2e;border-radius:8px;margin-bottom:4px;cursor:pointer;gap:8px;border-left:4px solid #666}
+.cal-item:active{background:#252540}
+.cal-item .ci-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.cal-item .ci-info{flex:1;min-width:0}
+.cal-item .ci-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-item .ci-meta{font-size:11px;color:#888}
+.cal-item .ci-stat{font-size:10px;font-weight:600;padding:2px 6px;border-radius:8px;flex-shrink:0}
+
+/* Calendar week view */
+.cal-week-row{display:flex;gap:4px;margin-bottom:8px}
+.cal-week-day{flex:1;background:#1a1a2e;border-radius:8px;padding:8px 4px;text-align:center;cursor:pointer;border:2px solid transparent;transition:border-color 0.15s}
+.cal-week-day:hover{background:#252540}
+.cal-week-day.active{border-color:#f39c12}
+.cal-week-day.today{background:rgba(243,156,18,0.1);border-color:rgba(243,156,18,0.3)}
+.cal-week-day .wd-name{font-size:10px;color:#888;text-transform:uppercase}
+.cal-week-day .wd-date{font-size:18px;font-weight:700;color:#fff;margin:2px 0}
+.cal-week-day .wd-count{font-size:10px;color:#f39c12;font-weight:600}
+.cal-week-day .wd-done{font-size:10px;color:#27ae60}
+.cal-week-day .wd-bar{height:3px;background:#1a1a2e;border-radius:2px;margin-top:4px;overflow:hidden}
+.cal-week-day .wd-bar-fill{height:100%;background:#f39c12;border-radius:2px;transition:width 0.2s}
+.cal-week-no{text-align:center;color:#888;padding:20px;font-size:13px}
 /* required styles */
 
 .leaflet-pane,
@@ -851,10 +889,30 @@ svg.leaflet-image-layer.leaflet-interactive path {
 <button class="tab-btn" id="tabTasksBtn" onclick="switchTab('tasks')"><span class="tab-icon">📝</span><span class="tab-label">Tasks</span></button>
 <button class="tab-btn" onclick="switchTab('more')"><span class="tab-icon">⚙️</span><span class="tab-label">More</span></button>
 </div>
-<div id="listView">
-<div id="listHeader"><input type="search" id="listSearch" placeholder="🔍 Search leads..." oninput="populateList()"></div>
-<div id="listCount"></div>
-<div id="listScroll"></div>
+
+<div id="leadsView">
+<div id="leadsTop">
+<div class="lt-row"><input type="search" id="ltSearch" placeholder="🔍 Search leads..." oninput="populateLeadsTable()"></div>
+<div class="lt-row">
+<select id="ltIndustry" onchange="populateLeadsTable()"><option value="">All Industries</option></select>
+<select id="ltCity" onchange="populateLeadsTable()"><option value="">All Cities</option></select>
+<select id="ltStatus" onchange="populateLeadsTable()"><option value="all">All Status</option><option value="scheduled">⭐ Scheduled</option><option value="0">Not Visited</option><option value="1">Contacted</option><option value="2">Visited</option></select>
+</div>
+</div>
+<div id="leadsCount"></div>
+<div id="leadsWrap"><table id="leadsTbl"><thead><tr><th>Business Name</th><th>Industry</th><th>City</th><th>Phone</th><th>Status</th></tr></thead><tbody id="leadsBody"></tbody></table></div>
+</div>
+
+<div id="calTabView">
+<div id="calTabTop">
+<button id="calViewDay" class="active" onclick="setCalView('day')">Day</button>
+<button id="calViewWeek" onclick="setCalView('week')">Week</button>
+<button id="calViewMonth" onclick="setCalView('month')">Month</button>
+<span id="calViewLabel"></span>
+<button onclick="calNav(-1)">◀</button>
+<button onclick="calNav(1)">▶</button>
+</div>
+<div id="calTabBody"></div>
 </div>
 <div id="panel"><div class="panel-header"><h2 id="panelTitle">Lead Details</h2><button class="close-btn" onclick="closePanel()">✕</button></div><div id="panelBody"></div></div>
 <script>/* @preserve
@@ -943,104 +1001,290 @@ window.onerror=function(m,u,l){showError("L"+l+": "+m);return false;};
 document.addEventListener("DOMContentLoaded",function(){init();});
 function escHtml(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 var currentTab='map';
+
 function switchTab(tab){
   currentTab=tab;
   var btns=document.querySelectorAll('.tab-btn');
-  for(var i=0;i<btns.length;i++){btns[i].classList.remove('active');}
-  if(tab==='map'){btns[0].classList.add('active');}
-  else if(tab==='leads'){btns[1].classList.add('active');}
-  else if(tab==='calendar'){btns[2].classList.add('active');}
-  else if(tab==='tasks'){btns[3].classList.add('active');}
-  else if(tab==='more'){btns[4].classList.add('active');}
+  for(var i=0;i<btns.length;i++)btns[i].classList.remove('active');
+  if(tab==='map')btns[0].classList.add('active');
+  else if(tab==='leads')btns[1].classList.add('active');
+  else if(tab==='calendar')btns[2].classList.add('active');
+  else if(tab==='tasks')btns[3].classList.add('active');
+  else if(tab==='more')btns[4].classList.add('active');
   
-  document.getElementById('listView').classList.remove('open');
+  // hide alternate views
+  var lv=document.getElementById('leadsView');if(lv)lv.classList.remove('open');
+  var cv=document.getElementById('calTabView');if(cv)cv.classList.remove('open');
   document.getElementById('calPanel').classList.remove('open');
   
-  if(document.getElementById('panel').classList.contains('open') && tab!=='map'){closePanel();}
-  if(tab!=='tasks'){closeTasks();}
-  if(tab!=='more'){closeHistory();}
+  if(document.getElementById('panel').classList.contains('open')&&tab!=='map')closePanel();
+  if(tab!=='tasks')closeTasks();
+  if(tab!=='more')closeHistory();
+  
+  var elMap=document.getElementById('map');
+  var elDay=document.getElementById('dayBar');
+  var elTop=document.getElementById('topbar');
+  var elLeg=document.getElementById('legend');
   
   if(tab==='map'){
-    document.getElementById('map').style.display='';
-    document.getElementById('dayBar').style.display='';
-    document.getElementById('topbar').style.display='';
-    document.getElementById('legend').style.display='';
-    if(typeof map!=='undefined'&&map){setTimeout(function(){map.invalidateSize();},200);}
+    elMap.style.display='';elDay.style.display='';elTop.style.display='';elLeg.style.display='';
+    if(typeof map!=='undefined'&&map)setTimeout(function(){map.invalidateSize();},200);
   }else if(tab==='leads'){
-    document.getElementById('map').style.display='none';
-    document.getElementById('dayBar').style.display='none';
-    document.getElementById('legend').style.display='none';
-    document.getElementById('listView').classList.add('open');
-    populateList();
+    elMap.style.display='none';elDay.style.display='none';elLeg.style.display='none';
+    if(lv)lv.classList.add('open');
+    populateLeadsFilters();
+    populateLeadsTable();
   }else if(tab==='calendar'){
-    document.getElementById('map').style.display='';
-    document.getElementById('dayBar').style.display='';
-    document.getElementById('legend').style.display='';
-    if(typeof map!=='undefined'&&map){setTimeout(function(){map.invalidateSize();},200);}
-    toggleCalendar();
+    elMap.style.display='';elDay.style.display='';elTop.style.display='';elLeg.style.display='';
+    if(typeof map!=='undefined'&&map)setTimeout(function(){map.invalidateSize();},200);
+    if(cv)cv.classList.add('open');
+    setCalView('day');
   }else if(tab==='tasks'){
-    document.getElementById('map').style.display='';
-    document.getElementById('dayBar').style.display='';
-    document.getElementById('legend').style.display='';
-    if(typeof map!=='undefined'&&map){setTimeout(function(){map.invalidateSize();},200);}
+    elMap.style.display='';elDay.style.display='';elLeg.style.display='';
+    if(typeof map!=='undefined'&&map)setTimeout(function(){map.invalidateSize();},200);
     showTasks();
   }else if(tab==='more'){
-    document.getElementById('map').style.display='none';
-    document.getElementById('dayBar').style.display='none';
-    document.getElementById('legend').style.display='none';
-    document.getElementById('listView').classList.add('open');
+    elMap.style.display='none';elDay.style.display='none';elLeg.style.display='none';
+    if(lv)lv.classList.add('open');
     showMoreMenu();
   }
   updateTaskBadge();
 }
 
-function populateList(){
-  var q=(document.getElementById('listSearch').value||'').toLowerCase();
-  var indF=document.getElementById('indFilter').value;
-  var cityF=document.getElementById('cityFilter').value;
-  var statF=document.getElementById('statusFilter').value;
+/* --- LEADS TABLE --- */
+function populateLeadsFilters(){
+  var ind=document.getElementById('ltIndustry');
+  var cit=document.getElementById('ltCity');
+  if(!ind||!cit)return;
+  var indV=ind.value, citV=cit.value;
+  ind.innerHTML='<option value="">All Industries</option>';
+  var inds=[];for(var k in iColors)inds.push(k);inds.sort();
+  for(var i=0;i<inds.length;i++){
+    ind.innerHTML+='<option value="'+escHtml(inds[i])+'"'+(inds[i]===indV?' selected':'')+'>'+escHtml(inds[i])+'</option>';
+  }
+  var cities={};for(var i=0;i<LEADS.length;i++){var c=LEADS[i][2];if(c)cities[c]=1;}
+  var csorted=Object.keys(cities).sort();
+  cit.innerHTML='<option value="">All Cities</option>';
+  for(var i=0;i<csorted.length;i++){
+    cit.innerHTML+='<option value="'+escHtml(csorted[i])+'"'+(csorted[i]===citV?' selected':'')+'>'+escHtml(csorted[i])+'</option>';
+  }
+}
+
+function populateLeadsTable(){
+  var q=(document.getElementById('ltSearch').value||'').toLowerCase();
+  var indF=document.getElementById('ltIndustry').value;
+  var cityF=document.getElementById('ltCity').value;
+  var statF=document.getElementById('ltStatus').value;
   var sched=loadSchedule();
-  var scroll=document.getElementById('listScroll');
-  var out=[];var count=0;
+  var tbody=document.getElementById('leadsBody');
+  if(!tbody)return;
+  var rows=[];var count=0;
   for(var i=0;i<LEADS.length;i++){
-    var l=LEADS[i];var name=l[0],ind=l[1],city=l[2],ph=l[4];
+    var l=LEADS[i],name=l[0],ind=l[1],city=l[2],ph=l[4];
     if(hiddenSet.has(i))continue;
     if(q&&name.toLowerCase().indexOf(q)<0&&city.toLowerCase().indexOf(q)<0&&ind.toLowerCase().indexOf(q)<0)continue;
     if(indF&&ind!==indF)continue;
     if(cityF&&city!==cityF)continue;
-    var vs=getVisitStatus(i);var status=vs[0];
+    var vs=getVisitStatus(i);var st=vs[0];
     if(statF==='scheduled'){
-      var f=false;
-      for(var d in sched){if(sched[d].indexOf(i)>=0){f=true;break;}}
+      var f=false;for(var d in sched){if(sched[d].indexOf(i)>=0){f=true;break;}}
       if(!f)continue;
-    }else if(statF&&statF!=='all'&&statF!=='scheduled'){
-      if(status!==parseInt(statF))continue;
-    }
-    var ic=iColors[ind]||'#666';
-    var badge='<span class="lc-stat-'+status+'">'+['⏳ Not Visited','📞 Contacted','✅ Visited'][status]+'</span>';
-    out.push('<div class="lead-card" style="border-left-color:'+ic+'" onclick="switchTab(\'map\');showPanel('+i+')"><div class="lc-name"><span>'+escHtml(name)+'</span><span class="lc-ind">'+escHtml(ind)+'</span></div><div class="lc-meta"><span>📍 '+escHtml(city)+'</span>'+(ph?'<span>📞 '+escHtml(ph)+'</span>':'')+'</div>'+badge+'</div>');
+    }else if(statF&&statF!=='all'&&statF!=='scheduled'){if(st!==parseInt(statF))continue;}
+    var statusLabels=['⏳ Not Visited','📞 Contacted','✅ Visited'];
+    rows.push('<tr onclick="switchTab(\'map\');showPanel('+i+')"><td class="lt-name">'+escHtml(name)+'</td><td style="color:#f39c12">'+escHtml(ind)+'</td><td>'+escHtml(city)+'</td><td style="color:#aaa">'+(ph?escHtml(ph):'—')+'</td><td><span class="lt-stat lt-stat-'+st+'">'+statusLabels[st]+'</span></td></tr>');
     count++;
   }
-  scroll.innerHTML=out.join('');
-  document.getElementById('listCount').textContent=count+' lead'+(count!==1?'s':'');
+  tbody.innerHTML=rows.join('');
+  document.getElementById('leadsCount').textContent=count+' lead'+(count!==1?'s':'');
 }
 
+/* --- CALENDAR VIEW --- */
+var calViewMode='day';
+var calAnchor=new Date();
+
+function setCalView(mode){
+  calViewMode=mode;
+  document.getElementById('calViewDay').classList.remove('active');
+  document.getElementById('calViewWeek').classList.remove('active');
+  document.getElementById('calViewMonth').classList.remove('active');
+  document.getElementById('calView'+mode.charAt(0).toUpperCase()+mode.slice(1)).classList.add('active');
+  renderCalView();
+}
+
+function calNav(dir){
+  if(calViewMode==='day'){calAnchor.setDate(calAnchor.getDate()+dir);}
+  else if(calViewMode==='week'){calAnchor.setDate(calAnchor.getDate()+dir*7);}
+  else{calAnchor.setMonth(calAnchor.getMonth()+dir);}
+  renderCalView();
+}
+
+function renderCalView(){
+  var body=document.getElementById('calTabBody');
+  if(!body)return;
+  var sched=loadSchedule();
+  var comp=getCompletedTasks_();
+  
+  if(calViewMode==='day'){
+    renderDayView(body,sched,comp);
+  }else if(calViewMode==='week'){
+    renderWeekView(body,sched,comp);
+  }else{
+    renderMonthView(body,sched,comp);
+  }
+}
+
+function renderDayView(body,sched,comp){
+  var d=fmtDate(calAnchor);
+  var label=document.getElementById('calViewLabel');
+  var dn=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  label.textContent=dn[calAnchor.getDay()]+', '+mn[calAnchor.getMonth()]+' '+calAnchor.getDate()+', '+calAnchor.getFullYear();
+  
+  var leads=sched[d]||[];
+  var done=comp[d]||{};
+  var html=[];
+  if(leads.length===0){
+    html.push('<div class="cal-week-no">No stops scheduled for this day</div>');
+  }else{
+    var complete=0;
+    for(var i=0;i<leads.length;i++){if(done[leads[i]])complete++;}
+    html.push('<div class="cal-day-title">'+fmtDatePretty(d)+'</div>');
+    html.push('<div class="cal-day-sub">'+complete+'/'+leads.length+' completed</div>');
+    for(var i=0;i<leads.length;i++){
+      var idx=leads[i];
+      if(idx<0||idx>=LEADS.length)continue;
+      var l=LEADS[idx],name=l[0],ind=l[1],city=l[2];
+      var ic=iColors[ind]||'#666';
+      var vs=getVisitStatus(idx);var st=vs[0];
+      var stLabels=['⏳ Not Visited','📞 Contacted','✅ Visited'];
+      var checked=done[idx]?'✅':'⬜';
+      html.push('<div class="cal-item" style="border-left-color:'+ic+'" onclick="switchTab(\'map\');showPanel('+idx+')"><span class="ci-dot" style="background:'+ic+'"></span><div class="ci-info"><div class="ci-name">'+checked+' '+escHtml(name)+'</div><div class="ci-meta">'+escHtml(ind)+' • '+escHtml(city)+'</div></div><span class="ci-stat lt-stat-'+st+'">'+stLabels[st]+'</span></div>');
+    }
+  }
+  body.innerHTML=html.join('');
+}
+
+function renderWeekView(body,sched,comp){
+  var label=document.getElementById('calViewLabel');
+  // find monday of week
+  var monday=new Date(calAnchor);
+  monday.setDate(monday.getDate()-((monday.getDay()+6)%7));
+  var sunday=new Date(monday);sunday.setDate(sunday.getDate()+6);
+  var mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  label.textContent=mn[monday.getMonth()]+' '+monday.getDate()+' – '+mn[sunday.getMonth()]+' '+sunday.getDate()+', '+sunday.getFullYear();
+  
+  var today=fmtDate(new Date());
+  var dn=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  var html=['<div class="cal-week-row">'];
+  for(var i=0;i<7;i++){
+    var day=new Date(monday);day.setDate(day.getDate()+i);
+    var ds=fmtDate(day);
+    var dayLeads=sched[ds]||[];
+    var dayDone=comp[ds]||{};
+    var doneCount=0;
+    for(var j=0;j<dayLeads.length;j++){if(dayDone[dayLeads[j]])doneCount++;}
+    var total=dayLeads.length;
+    var pct=total?Math.round(doneCount/total*100):0;
+    var cls=['cal-week-day'];
+    if(ds===today)cls.push('today');
+    if(ds===fmtDate(calAnchor))cls.push('active');
+    html.push('<div class="'+cls.join(' ')+'" onclick="calAnchor=new Date(\''+ds+'\');setCalView(\'day\')"><div class="wd-name">'+dn[i]+'</div><div class="wd-date">'+day.getDate()+'</div>'+(total?'<div class="wd-count">'+total+' stop'+(total!==1?'s':'')+'</div><div class="wd-done">'+doneCount+' done</div><div class="wd-bar"><div class="wd-bar-fill" style="width:'+pct+'%"></div></div>':'<div class="wd-count" style="color:#555">—</div>')+'</div>');
+  }
+  html.push('</div>');
+  html.push('<div style="margin-top:12px">');
+  
+  // List all leads for the week
+  var shown=false;
+  for(var i=0;i<7;i++){
+    var day=new Date(monday);day.setDate(day.getDate()+i);
+    var ds=fmtDate(day);
+    var dayLeads=sched[ds]||[];
+    if(dayLeads.length===0)continue;
+    shown=true;
+    var dayDone=comp[ds]||{};
+    html.push('<div style="font-weight:700;color:#f39c12;margin:8px 0 4px;font-size:12px">'+fmtDatePretty(ds)+'</div>');
+    for(var j=0;j<dayLeads.length;j++){
+      var idx=dayLeads[j];
+      if(idx<0||idx>=LEADS.length)continue;
+      var l=LEADS[idx],name=l[0],ind=l[1],city=l[2];
+      var ic=iColors[ind]||'#666';
+      html.push('<div class="cal-item" style="border-left-color:'+ic+';margin-bottom:2px" onclick="switchTab(\'map\');showPanel('+idx+')"><span class="ci-dot" style="background:'+ic+'"></span><div class="ci-info"><div class="ci-name">'+(dayDone[idx]?'✅ ':'⬜ ')+escHtml(name)+'</div><div class="ci-meta">'+escHtml(ind)+' • '+escHtml(city)+'</div></div></div>');
+    }
+  }
+  if(!shown)html.push('<div class="cal-week-no">No stops scheduled this week</div>');
+  html.push('</div>');
+  body.innerHTML=html.join('');
+}
+
+function renderMonthView(body,sched,comp){
+  var label=document.getElementById('calViewLabel');
+  var mn=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  label.textContent=mn[calAnchor.getMonth()]+' '+calAnchor.getFullYear();
+  
+  var today=fmtDate(new Date());
+  var year=calAnchor.getFullYear(), month=calAnchor.getMonth();
+  var firstDay=new Date(year,month,1);
+  var startDow=(firstDay.getDay()+6)%7; // Mon=0
+  var daysInMonth=new Date(year,month+1,0).getDate();
+  
+  var dn=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  var html=['<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center">'];
+  // Day headers
+  for(var i=0;i<7;i++)html.push('<div style="font-size:10px;color:#888;padding:4px 0">'+dn[i]+'</div>');
+  // Empty cells before 1st
+  for(var i=0;i<startDow;i++)html.push('<div></div>');
+  // Days
+  for(var d=1;d<=daysInMonth;d++){
+    var date=new Date(year,month,d);
+    var ds=fmtDate(date);
+    var dayLeads=sched[ds]||[];
+    var dayDone=comp[ds]||{};
+    var doneCount=0;
+    for(var j=0;j<dayLeads.length;j++){if(dayDone[dayLeads[j]])doneCount++;}
+    var bg='#1a1a2e';
+    var border='';
+    if(ds===today)border='border:1px solid #f39c12;';
+    if(ds===fmtDate(calAnchor))bg='rgba(243,156,18,0.15)';
+    var style='background:'+bg+';padding:6px 2px;border-radius:6px;cursor:pointer;'+border;
+    var dots='';
+    if(dayLeads.length>0){
+      var pct=Math.round(doneCount/dayLeads.length*100);
+      var clr=pct===100?'#27ae60':'#f39c12';
+      dots='<div style="margin-top:2px"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:'+clr+';margin:1px"></span><span style="font-size:9px;color:'+clr+'">'+doneCount+'/'+dayLeads.length+'</span></div>';
+    }
+    html.push('<div style="'+style+'" onclick="calAnchor=new Date(\''+ds+'\');setCalView(\'day\')"><div style="font-size:13px;font-weight:700;color:#fff">'+d+'</div>'+dots+'</div>');
+  }
+  html.push('</div>');
+  body.innerHTML=html.join('');
+}
+
+function fmtDate(d){return d.toISOString().split('T')[0];}
+function fmtDatePretty(ds){
+  var parts=ds.split('-');
+  var mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return mn[parseInt(parts[1])-1]+' '+parseInt(parts[2])+', '+parts[0];
+}
+
+/* --- MORE MENU --- */
 function showMoreMenu(){
-  var scroll=document.getElementById('listScroll');
-  document.getElementById('listCount').textContent='';
-  var out=['<div style="padding:12px">'];
+  var scroll=document.getElementById('leadsWrap')||document.getElementById('leadsBody');
+  if(!scroll){document.getElementById('leadsCount')&&(document.getElementById('leadsCount').textContent='');return;}
+  document.getElementById('leadsCount').textContent='';
+  var out=['<div style="padding:12px;max-width:500px;margin:0 auto">'];
   out.push('<h3 style="color:#f39c12;margin-bottom:12px">⚙️ More</h3>');
   out.push('<button style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #444;color:#ddd;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit" onclick="showHistory()">📋 Visit History</button>');
-  out.push('<button style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #444;color:#ddd;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit" onclick="exportCSV()">📥 Export CSV</button>');
-  out.push('<button style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #444;color:#ddd;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit" onclick="resetFilters();switchTab(\'map\')">↺ Reset Filters</button>');
+  out.push('<button style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #444;color:#ddd;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit" onclick="exportCSV()">📥 Export All Leads (CSV)</button>');
+  out.push('<button style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #444;color:#ddd;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit" onclick="resetFilters();switchTab(\'map\')">↺ Reset All Filters</button>');
   if(typeof hiddenSet!=='undefined'&&hiddenSet&&hiddenSet.size>0){
     out.push('<button style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #e67e22;color:#e67e22;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit" onclick="restoreHidden()">🔄 Restore '+hiddenSet.size+' Hidden</button>');
   }
-  out.push('<div style="margin-top:16px;padding:12px;background:#1a1a2e;border-radius:8px;font-size:12px;color:#888"><strong>JPRO Territory CRM v21</strong><br>Total: '+LEADS.length+' leads<br>Industries: '+Object.keys(iColors).length+'</div>');
+  out.push('<div style="margin-top:16px;padding:12px;background:#1a1a2e;border-radius:8px;font-size:12px;color:#888"><strong>JPRO Territory CRM v22</strong><br>Total: '+LEADS.length+' leads<br>'.concat('Industries: ')+Object.keys(iColors).length+'</div>');
   out.push('</div>');
-  scroll.innerHTML=out.join('');
+  if(scroll&&scroll.parentElement)scroll.parentElement.innerHTML=out.join('');
+  else document.getElementById('leadsWrap')&&(document.getElementById('leadsWrap').innerHTML=out.join(''));
 }
 
+/* --- TASK BADGE --- */
 function updateTaskBadge(){
   var btn=document.getElementById('tabTasksBtn');
   if(!btn)return;
@@ -1072,5 +1316,5 @@ function getCompletedTasks_(){
 }
 </script>
 <script>var loadTimeout=setTimeout(function(){document.getElementById("load").querySelector("h2").textContent="Still loading...";},5000);
-setTimeout(updateTaskBadge,300);</script>
+setTimeout(function(){if(typeof updateTaskBadge==="function")updateTaskBadge();},500);</script>
 </body></html>
