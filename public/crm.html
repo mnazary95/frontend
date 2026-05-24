@@ -940,8 +940,8 @@ function exportDay(){try{var lines=[];lines.push("ROUTE \u2014 "+fmtDate(activeD
 function buildLegend(){try{var h="",c={};LEADS.forEach(function(l){c[l[1]]=(c[l[1]]||0)+1;});Object.keys(c).sort().forEach(function(k){h+='<div class="li"><div class="dot" style="background:'+getColor(k)+'"></div>'+k+" ("+c[k]+")</div>";});document.getElementById("legend").innerHTML=h;}catch(e){}}
 function showError(msg){try{var d=document.getElementById("load");d.querySelector("h2").textContent="\u26a0 Error";d.querySelector(".spinner").style.display="none";document.getElementById("errMsg").style.display="block";document.getElementById("errMsg").textContent=msg+"\nTry refreshing.";}catch(e2){console.error(msg);}}
 window.onerror=function(m,u,l){showError("L"+l+": "+m);return false;};
-document.addEventListener("DOMContentLoaded",function(){init();});</script>
-<script>var loadTimeout=setTimeout(function(){document.getElementById("load").querySelector("h2").textContent="Still loading...";
+document.addEventListener("DOMContentLoaded",function(){init();});
+function escHtml(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 var currentTab='map';
 function switchTab(tab){
   currentTab=tab;
@@ -965,7 +965,7 @@ function switchTab(tab){
     document.getElementById('dayBar').style.display='';
     document.getElementById('topbar').style.display='';
     document.getElementById('legend').style.display='';
-    if(map){setTimeout(function(){map.invalidateSize();},100);}
+    if(typeof map!=='undefined'&&map){setTimeout(function(){map.invalidateSize();},200);}
   }else if(tab==='leads'){
     document.getElementById('map').style.display='none';
     document.getElementById('dayBar').style.display='none';
@@ -976,13 +976,13 @@ function switchTab(tab){
     document.getElementById('map').style.display='';
     document.getElementById('dayBar').style.display='';
     document.getElementById('legend').style.display='';
-    if(map){setTimeout(function(){map.invalidateSize();},100);}
+    if(typeof map!=='undefined'&&map){setTimeout(function(){map.invalidateSize();},200);}
     toggleCalendar();
   }else if(tab==='tasks'){
     document.getElementById('map').style.display='';
     document.getElementById('dayBar').style.display='';
     document.getElementById('legend').style.display='';
-    if(map){setTimeout(function(){map.invalidateSize();},100);}
+    if(typeof map!=='undefined'&&map){setTimeout(function(){map.invalidateSize();},200);}
     showTasks();
   }else if(tab==='more'){
     document.getElementById('map').style.display='none';
@@ -1003,7 +1003,7 @@ function populateList(){
   var scroll=document.getElementById('listScroll');
   var out=[];var count=0;
   for(var i=0;i<LEADS.length;i++){
-    var l=LEADS[i];var name=l[0],ind=l[1],city=l[2],addr=l[3],ph=l[4];
+    var l=LEADS[i];var name=l[0],ind=l[1],city=l[2],ph=l[4];
     if(hiddenSet.has(i))continue;
     if(q&&name.toLowerCase().indexOf(q)<0&&city.toLowerCase().indexOf(q)<0&&ind.toLowerCase().indexOf(q)<0)continue;
     if(indF&&ind!==indF)continue;
@@ -1018,7 +1018,7 @@ function populateList(){
     }
     var ic=iColors[ind]||'#666';
     var badge='<span class="lc-stat-'+status+'">'+['⏳ Not Visited','📞 Contacted','✅ Visited'][status]+'</span>';
-    out.push('<div class="lead-card" style="border-left-color:'+ic+'" onclick="switchTab('map');showPanel('+i+')"><div class="lc-name"><span>'+escHtml(name)+'</span><span class="lc-ind">'+escHtml(ind)+'</span></div><div class="lc-meta"><span>📍 '+escHtml(city)+'</span>'+(ph?'<span>📞 '+escHtml(ph)+'</span>':'')+'</div>'+badge+'</div>');
+    out.push('<div class="lead-card" style="border-left-color:'+ic+'" onclick="switchTab(\'map\');showPanel('+i+')"><div class="lc-name"><span>'+escHtml(name)+'</span><span class="lc-ind">'+escHtml(ind)+'</span></div><div class="lc-meta"><span>📍 '+escHtml(city)+'</span>'+(ph?'<span>📞 '+escHtml(ph)+'</span>':'')+'</div>'+badge+'</div>');
     count++;
   }
   scroll.innerHTML=out.join('');
@@ -1032,8 +1032,8 @@ function showMoreMenu(){
   out.push('<h3 style="color:#f39c12;margin-bottom:12px">⚙️ More</h3>');
   out.push('<button style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #444;color:#ddd;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit" onclick="showHistory()">📋 Visit History</button>');
   out.push('<button style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #444;color:#ddd;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit" onclick="exportCSV()">📥 Export CSV</button>');
-  out.push('<button style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #444;color:#ddd;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit" onclick="resetFilters();switchTab('map')">↺ Reset Filters</button>');
-  if(hiddenSet&&hiddenSet.size>0){
+  out.push('<button style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #444;color:#ddd;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit" onclick="resetFilters();switchTab(\'map\')">↺ Reset Filters</button>');
+  if(typeof hiddenSet!=='undefined'&&hiddenSet&&hiddenSet.size>0){
     out.push('<button style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #e67e22;color:#e67e22;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit" onclick="restoreHidden()">🔄 Restore '+hiddenSet.size+' Hidden</button>');
   }
   out.push('<div style="margin-top:16px;padding:12px;background:#1a1a2e;border-radius:8px;font-size:12px;color:#888"><strong>JPRO Territory CRM v21</strong><br>Total: '+LEADS.length+' leads<br>Industries: '+Object.keys(iColors).length+'</div>');
@@ -1052,7 +1052,7 @@ function updateTaskBadge(){
     var count=0;
     for(var d in sched){
       if(d>=today&&sched[d].length>0){
-        var comp=getCompletedTasks();
+        var comp=getCompletedTasks_();
         var done=comp[d]||{};
         for(var i=0;i<sched[d].length;i++){
           if(!done[sched[d][i]])count++;
@@ -1067,9 +1067,10 @@ function updateTaskBadge(){
     }
   }catch(e){}
 }
-function getCompletedTasks(){
+function getCompletedTasks_(){
   try{return JSON.parse(localStorage.jpro_completed||'{}');}catch(e){return {};}
 }
-
-updateTaskBadge();},5000);</script>
+</script>
+<script>var loadTimeout=setTimeout(function(){document.getElementById("load").querySelector("h2").textContent="Still loading...";},5000);
+setTimeout(updateTaskBadge,300);</script>
 </body></html>
