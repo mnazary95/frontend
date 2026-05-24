@@ -1033,10 +1033,10 @@ function switchTab(tab){
 
   if(tab==='map'){
     // Show topbar on map tab - ALL original filters work
-    if(elT)elT.style.display='';
-    if(elM)elM.style.display='';
-    if(elD)elD.style.display='';
-    if(elL)elL.style.display='';
+    if(elT)elT.style.display='flex';
+    if(elM)elM.style.display='block';
+    if(elD)elD.style.display='flex';
+    if(elL)elL.style.display='block';
     if(elB&&typeof selectMode!=='undefined'&&selectMode)elB.style.display='flex';else if(elB)elB.style.display='none';
     if(typeof map!=='undefined'&&map)setTimeout(function(){map.invalidateSize();},300);
     // Refresh markers via doFilter
@@ -1051,11 +1051,11 @@ function switchTab(tab){
       if(elM)elM.style.display='none';if(elD)elD.style.display='none';if(elL)elL.style.display='none';
       var lv=document.getElementById('leadsView');if(lv){lv.classList.add('open');populateLeadsFilters();populateLeadsTable();}
     }else if(tab==='calendar'){
-      if(elM)elM.style.display='';if(elD)elD.style.display='';if(elL)elL.style.display='none';
+      if(elM)elM.style.display='block';if(elD)elD.style.display='flex';if(elL)elL.style.display='none';
       if(typeof map!=='undefined'&&map)setTimeout(function(){map.invalidateSize();},200);
       var cv=document.getElementById('calTabView');if(cv){cv.classList.add('open');calRefresh_();calSetView_('day');}
     }else if(tab==='tasks'){
-      if(elM)elM.style.display='';if(elD)elD.style.display='';if(elL)elL.style.display='none';
+      if(elM)elM.style.display='block';if(elD)elD.style.display='flex';if(elL)elL.style.display='none';
       if(typeof map!=='undefined'&&map)setTimeout(function(){map.invalidateSize();},200);
       showTasks();
     }else if(tab==='more'){
