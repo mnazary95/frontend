@@ -1,0 +1,9 @@
+{
+  "name": "JPRO Territory CRM",
+  "short_name": "JPRO CRM",
+  "start_url": "/frontend/public/crm.html",
+  "scope": "/frontend/public/",
+  "display": "standalone",
+  "theme_color": "#0f0f1a",
+  "background_color": "#0f0f1a"
+}
