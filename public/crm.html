@@ -1134,7 +1134,7 @@ function renderCalView(){
 }
 
 function renderDayView(body,sched,comp){
-  var d=fmtDate(calAnchor);
+  var d=fmtISODate(calAnchor);
   var label=document.getElementById('calViewLabel');
   var dn=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -1173,12 +1173,12 @@ function renderWeekView(body,sched,comp){
   var mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   label.textContent=mn[monday.getMonth()]+' '+monday.getDate()+' – '+mn[sunday.getMonth()]+' '+sunday.getDate()+', '+sunday.getFullYear();
   
-  var today=fmtDate(new Date());
+  var today=fmtISODate(new Date());
   var dn=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   var html=['<div class="cal-week-row">'];
   for(var i=0;i<7;i++){
     var day=new Date(monday);day.setDate(day.getDate()+i);
-    var ds=fmtDate(day);
+    var ds=fmtISODate(day);
     var dayLeads=sched[ds]||[];
     var dayDone=comp[ds]||{};
     var doneCount=0;
@@ -1187,7 +1187,7 @@ function renderWeekView(body,sched,comp){
     var pct=total?Math.round(doneCount/total*100):0;
     var cls=['cal-week-day'];
     if(ds===today)cls.push('today');
-    if(ds===fmtDate(calAnchor))cls.push('active');
+    if(ds===fmtISODate(calAnchor))cls.push('active');
     html.push('<div class="'+cls.join(' ')+'" onclick="calAnchor=new Date(\''+ds+'\');setCalView(\'day\')"><div class="wd-name">'+dn[i]+'</div><div class="wd-date">'+day.getDate()+'</div>'+(total?'<div class="wd-count">'+total+' stop'+(total!==1?'s':'')+'</div><div class="wd-done">'+doneCount+' done</div><div class="wd-bar"><div class="wd-bar-fill" style="width:'+pct+'%"></div></div>':'<div class="wd-count" style="color:#555">—</div>')+'</div>');
   }
   html.push('</div>');
@@ -1197,7 +1197,7 @@ function renderWeekView(body,sched,comp){
   var shown=false;
   for(var i=0;i<7;i++){
     var day=new Date(monday);day.setDate(day.getDate()+i);
-    var ds=fmtDate(day);
+    var ds=fmtISODate(day);
     var dayLeads=sched[ds]||[];
     if(dayLeads.length===0)continue;
     shown=true;
@@ -1221,7 +1221,7 @@ function renderMonthView(body,sched,comp){
   var mn=['January','February','March','April','May','June','July','August','September','October','November','December'];
   label.textContent=mn[calAnchor.getMonth()]+' '+calAnchor.getFullYear();
   
-  var today=fmtDate(new Date());
+  var today=fmtISODate(new Date());
   var year=calAnchor.getFullYear(), month=calAnchor.getMonth();
   var firstDay=new Date(year,month,1);
   var startDow=(firstDay.getDay()+6)%7; // Mon=0
@@ -1236,7 +1236,7 @@ function renderMonthView(body,sched,comp){
   // Days
   for(var d=1;d<=daysInMonth;d++){
     var date=new Date(year,month,d);
-    var ds=fmtDate(date);
+    var ds=fmtISODate(date);
     var dayLeads=sched[ds]||[];
     var dayDone=comp[ds]||{};
     var doneCount=0;
@@ -1244,7 +1244,7 @@ function renderMonthView(body,sched,comp){
     var bg='#1a1a2e';
     var border='';
     if(ds===today)border='border:1px solid #f39c12;';
-    if(ds===fmtDate(calAnchor))bg='rgba(243,156,18,0.15)';
+    if(ds===fmtISODate(calAnchor))bg='rgba(243,156,18,0.15)';
     var style='background:'+bg+';padding:6px 2px;border-radius:6px;cursor:pointer;'+border;
     var dots='';
     if(dayLeads.length>0){
@@ -1258,7 +1258,7 @@ function renderMonthView(body,sched,comp){
   body.innerHTML=html.join('');
 }
 
-function fmtDate(d){return d.toISOString().split('T')[0];}
+function fmtISODate(d){return d.toISOString().split('T')[0];}
 function fmtDatePretty(ds){
   var parts=ds.split('-');
   var mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
