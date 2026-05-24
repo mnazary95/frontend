@@ -119,6 +119,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 
 @media(max-width:420px){#panel{max-width:100%}.slide-panel{max-width:100%}#datePick{width:120px;font-size:13px}#search{font-size:13px}}
 </style>
+<style>
+/* === Calendar Route Planner === */
+.cal-route-section{margin-top:8px;background:#1a1a2e;border-radius:10px;padding:10px;border:1px solid #2a2a3e}
+.cal-route-hdr{color:#f39c12;font-weight:700;font-size:13px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.cal-route-stop{display:flex;align-items:center;padding:8px 6px;background:rgba(26,26,46,0.7);border-radius:6px;margin-bottom:4px;gap:6px;border-left:3px solid #666;font-size:12px}
+.cal-route-stop .rs-num{background:#f39c12;color:#000;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.cal-route-stop .rs-info{flex:1;min-width:0;color:#ddd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-route-stop .rs-dist{font-size:10px;color:#888;flex-shrink:0}
+.cal-route-arrows{display:flex;flex-direction:column;gap:0;flex-shrink:0}
+.cal-route-arrows button{background:none;border:none;color:#888;cursor:pointer;font-size:14px;padding:0 2px;line-height:1}
+.cal-route-arrows button:active{color:#f39c12}
+.cal-route-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.cal-route-actions button{flex:1;min-width:80px;padding:10px 8px;background:#252540;border:1px solid #333;color:#ddd;border-radius:8px;cursor:pointer;font-size:11px;font-family:inherit;font-weight:600}
+.cal-route-actions .ra-primary{background:#f39c12;color:#000;border-color:#f39c12}
+</style>
 <style>/* topbar always visible */
 /* === TAB BAR === */
 #tabBar{position:absolute;bottom:0;left:0;right:0;z-index:1002;background:rgba(15,15,26,0.98);border-top:1px solid #2a2a3e;display:flex;padding:2px 4px env(safe-area-inset-bottom)}
@@ -1188,7 +1203,60 @@ function calDayView_(body){
       h.push('<div class="cal-stop-row" style="border-left-color:'+(iColors[l[1]]||'#666')+'" onclick="switchTab(\'map\');openLead('+idx+')"><span class="cal-stop-dot" style="background:'+(iColors[l[1]]||'#666')+'"></span><div class="cal-stop-info"><div class="cal-stop-name">'+(done.indexOf(idx)>=0?'✅ ':'⬜ ')+esc(l[0])+'</div><div class="cal-stop-meta">'+esc(l[1])+' \u2022 '+esc(l[2])+'</div></div><span class="lt-stat lt-stat-'+((visits['l'+idx]||{status:0}).status)+'">'+stl[(visits['l'+idx]||{status:0}).status]+'</span></div>');
     }
   }
+  // Route planner section
+  h.push('<div class="cal-route-section">');
+  h.push('<div class="cal-route-hdr">🗺️ Route Planner <span style="font-size:10px;color:#888;font-weight:400">('+stops.length+' stops)</span></div>');
+  
+  if(stops.length<=1){
+    h.push('<div style="color:#888;font-size:11px;padding:6px 0">Need 2+ stops to plan a route</div>');
+  }else{
+    // Get coordinates for each stop
+    var routeStops=[];
+    for(var i=0;i<stops.length;i++){
+      var idx=stops[i];if(idx<0||idx>=LEADS.length)continue;
+      var l=LEADS[idx];
+      routeStops.push({idx:idx,name:l[0],industry:l[1],city:l[2],lat:l[6],lng:l[7],done:done.indexOf(idx)>=0});
+    }
+    // Show route order
+    for(var i=0;i<routeStops.length;i++){
+      var rs=routeStops[i];
+      h.push('<div class="cal-route-stop" style="border-left-color:'+(iColors[rs.industry]||'#666')+'">');
+      h.push('<span class="rs-num">'+(i+1)+'</span>');
+      h.push('<span class="rs-info">'+(rs.done?'✅ ':'')+esc(rs.name)+' <span style="color:#888;font-size:10px">'+esc(rs.city)+'</span></span>');
+      // Calculate distance to next
+      var dist='';
+      if(i<routeStops.length-1&&rs.lat&&rs.lng&&routeStops[i+1].lat&&routeStops[i+1].lng){
+        var d=calcDist_(rs.lat,rs.lng,routeStops[i+1].lat,routeStops[i+1].lng);
+        dist=d<1?(Math.round(d*1000)+'m'):(d.toFixed(1)+'km');
+      }
+      h.push('<span class="rs-dist">'+dist+'</span>');
+      h.push('<div class="cal-route-arrows">');
+      if(i>0)h.push('<button onclick="calSwapStops_('+i+','+(i-1)+')">▲</button>');
+      if(i<routeStops.length-1)h.push('<button onclick="calSwapStops_('+i+','+(i+1)+')">▼</button>');
+      h.push('</div>');
+      h.push('</div>');
+    }
+    // Total distance
+    var totalD=0;
+    for(var i=0;i<routeStops.length-1;i++){
+      if(routeStops[i].lat&&routeStops[i].lng&&routeStops[i+1].lat&&routeStops[i+1].lng){
+        totalD+=calcDist_(routeStops[i].lat,routeStops[i].lng,routeStops[i+1].lat,routeStops[i+1].lng);
+      }
+    }
+    if(totalD>0)h.push('<div style="text-align:right;color:#888;font-size:10px;padding:4px 0">Total: ~'+totalD.toFixed(0)+'km</div>');
+    // Action buttons
+    h.push('<div class="cal-route-actions">');
+    h.push('<button onclick="calOptimizeRoute_()">⚡ Optimize</button>');
+    h.push('<button class="ra-primary" onclick="calViewRoute_()">🗺️ View on Map</button>');
+    h.push('</div>');
+  }
+  h.push('</div>');
+  
   body.innerHTML=h.join('');
+  
+  // Store route data for swap/optimize/view
+  window._calRouteDate=ds;
+  window._calRouteStops=stops;
 }
 
 function calWeekView_(body){
@@ -1298,6 +1366,74 @@ function updateTaskBadge(){
       btn.appendChild(b);
     }
   }catch(e){}
+}
+
+/* --- CALENDAR ROUTE FUNCTIONS --- */
+function calcDist_(lat1,lng1,lat2,lng2){
+  var R=6371,dLat=(lat2-lat1)*Math.PI/180,dLng=(lng2-lng1)*Math.PI/180;
+  var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function calSwapStops_(a,b){
+  var ds=window._calRouteDate,stops=window._calRouteStops;
+  if(!ds||!stops){calRefresh_();calSetView_('day');return;}
+  var tmp=stops[a];stops[a]=stops[b];stops[b]=tmp;
+  schedule[ds]=stops;
+  try{localStorage.setItem('jpro_schedule',JSON.stringify(schedule));}catch(e){}
+  window._calRouteStops=stops;
+  calSetView_('day');
+}
+
+function calOptimizeRoute_(){
+  var ds=window._calRouteDate,stops=window._calRouteStops;
+  if(!ds||!stops||stops.length<2)return;
+  // Nearest-neighbor optimization starting from first stop
+  var pts=[];
+  for(var i=0;i<stops.length;i++){
+    var l=LEADS[stops[i]];
+    pts.push({idx:stops[i],lat:l[6],lng:l[7]});
+  }
+  var ordered=[pts[0]],remaining=pts.slice(1);
+  while(remaining.length>0){
+    var last=ordered[ordered.length-1],best=0,bestD=Infinity;
+    for(var i=0;i<remaining.length;i++){
+      var d=calcDist_(last.lat,last.lng,remaining[i].lat,remaining[i].lng);
+      if(d<bestD){bestD=d;best=i;}
+    }
+    ordered.push(remaining[best]);remaining.splice(best,1);
+  }
+  schedule[ds]=ordered.map(function(p){return p.idx;});
+  try{localStorage.setItem('jpro_schedule',JSON.stringify(schedule));}catch(e){}
+  window._calRouteStops=schedule[ds];
+  calSetView_('day');
+}
+
+function calViewRoute_(){
+  var ds=window._calRouteDate,stops=window._calRouteStops;
+  if(!ds||!stops)return;
+  // Switch to map tab and open the route view
+  if(typeof setDate==='function')setDate(ds);
+  if(typeof switchTab==='function')switchTab('map');
+  // Show stops in order on map with lines
+  if(typeof map!=='undefined'&&map){
+    // Clear existing route lines (stored in window._routeLines)
+    if(window._routeLines){for(var i=0;i<window._routeLines.length;i++)map.removeLayer(window._routeLines[i]);}
+    window._routeLines=[];
+    var coords=[];
+    for(var i=0;i<stops.length;i++){
+      var l=LEADS[stops[i]];
+      if(l[6]&&l[7])coords.push([l[6],l[7]]);
+    }
+    if(coords.length>1){
+      var line=L.polyline(coords,{color:'#f39c12',weight:3,opacity:0.8,dashArray:'8 4'});
+      line.addTo(map);
+      window._routeLines.push(line);
+      map.fitBounds(line.getBounds().pad(0.1));
+    }else if(coords.length===1){
+      map.setView(coords[0],14);
+    }
+  }
 }
 </script>
 <script>var loadTimeout=setTimeout(function(){document.getElementById("load").querySelector("h2").textContent="Still loading...";},5000);
