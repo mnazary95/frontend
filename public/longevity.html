@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PeakForm — Executive Longevity</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0a0a14;color:#e0e0e0;line-height:1.6}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+
+/* HERO */
+.hero{padding:80px 0 60px;text-align:center;background:linear-gradient(180deg,#0a0a14 0%,#0f0f2a 100%)}
+.hero-badge{display:inline-block;background:rgba(168,85,247,0.15);color:#a855f7;padding:6px 16px;border-radius:20px;font-size:13px;font-weight:600;margin-bottom:24px;border:1px solid rgba(168,85,247,0.3)}
+.hero h1{font-size:clamp(32px,6vw,52px);font-weight:800;line-height:1.15;margin-bottom:20px;background:linear-gradient(135deg,#a855f7,#6366f1,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:18px;color:#999;max-width:600px;margin:0 auto 36px}
+.hero-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-primary{padding:14px 32px;background:linear-gradient(135deg,#a855f7,#6366f1);color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;text-decoration:none;transition:transform 0.2s}
+.btn-primary:hover{transform:translateY(-2px)}
+.btn-secondary{padding:14px 32px;background:transparent;color:#a0a0c0;border:1px solid #333;border-radius:8px;font-size:16px;font-weight:500;cursor:pointer;text-decoration:none}
+
+/* TRUST BAR */
+.trust-bar{padding:40px 0;text-align:center;border-top:1px solid #1a1a2e;border-bottom:1px solid #1a1a2e}
+.trust-bar span{color:#555;font-size:13px;text-transform:uppercase;letter-spacing:2px}
+.trust-logos{display:flex;gap:40px;justify-content:center;align-items:center;margin-top:16px;flex-wrap:wrap}
+.trust-logos div{color:#666;font-size:18px;font-weight:700;letter-spacing:1px}
+
+/* HOW IT WORKS */
+.section{padding:80px 0}
+.section-label{color:#a855f7;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-bottom:12px}
+.section h2{font-size:clamp(26px,5vw,38px);font-weight:700;margin-bottom:16px;color:#fff}
+.section-sub{color:#888;font-size:16px;max-width:600px;margin-bottom:48px}
+
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:24px}
+.step{background:#111122;padding:28px 24px;border-radius:12px;border:1px solid #1a1a2e;position:relative}
+.step-num{font-size:48px;font-weight:900;color:rgba(168,85,247,0.08);position:absolute;top:12px;right:16px;line-height:1}
+.step h3{font-size:17px;font-weight:700;color:#fff;margin-bottom:8px}
+.step p{font-size:14px;color:#888;line-height:1.6}
+
+/* PROTOCOLS */
+.protocols{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.protocol{background:#111122;padding:24px;border-radius:10px;border:1px solid #1a1a2e;border-left:3px solid #a855f7}
+.protocol h4{color:#fff;font-size:15px;font-weight:600;margin-bottom:6px}
+.protocol p{color:#888;font-size:13px}
+
+/* PRICING */
+.pricing-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.card{background:#111122;padding:32px;border-radius:12px;border:1px solid #1a1a2e}
+.card.featured{border-color:#a855f7;background:#151525;position:relative}
+.card.featured::before{content:"MOST POPULAR";position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#a855f7;color:#fff;padding:4px 14px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:1px}
+.card h3{font-size:20px;color:#fff;margin-bottom:8px}
+.card .price{font-size:36px;font-weight:800;color:#a855f7;margin-bottom:4px}
+.card .price small{font-size:14px;font-weight:400;color:#888}
+.card .unit{color:#666;font-size:13px;margin-bottom:20px}
+.card ul{list-style:none;margin-bottom:24px}
+.card ul li{padding:6px 0;font-size:14px;color:#aaa;border-bottom:1px solid rgba(255,255,255,0.04)}
+.card ul li::before{content:"✓ ";color:#a855f7}
+.card .btn-primary{display:block;text-align:center}
+
+/* QUIZ */
+.quiz{background:#111122;border:1px solid #1a1a2e;border-radius:16px;padding:40px;max-width:600px;margin:0 auto}
+.quiz h3{color:#fff;font-size:20px;margin-bottom:24px}
+.quiz-q{margin-bottom:20px}
+.quiz-q label{display:block;color:#aaa;font-size:13px;margin-bottom:6px}
+.quiz-q select,.quiz-q input{width:100%;padding:12px;background:#0a0a14;border:1px solid #2a2a3e;color:#ddd;border-radius:8px;font-size:15px;font-family:inherit}
+#quiz-result{display:none;text-align:center;margin-top:24px}
+
+/* FOOTER */
+footer{padding:40px 0;text-align:center;color:#555;font-size:13px;border-top:1px solid #1a1a2e}
+footer a{color:#a855f7;text-decoration:none}
+
+@media(max-width:600px){.hero{padding:50px 0 40px}.section{padding:50px 0}.steps{grid-template-columns:1fr}.quiz{padding:24px}}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">🏥 Virtual-First · AI-Powered · Ontario-Based</div>
+    <h1>Optimize Your Biology.<br>Own Your Next Decade.</h1>
+    <p>Executive-grade longevity diagnostics, personalized protocols, and continuous monitoring — without clinic visits. Built for leaders who can't afford to slow down.</p>
+    <div class="hero-cta">
+      <a href="#quiz-start" class="btn-primary">Take the Assessment →</a>
+      <a href="#how" class="btn-secondary">See How It Works</a>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST -->
+<div class="trust-bar">
+  <span>Built on</span>
+  <div class="trust-logos">
+    <div>CPSO COMPLIANT</div>
+    <div>PHIPA SECURE</div>
+    <div>MD-LED CARE</div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="section" id="how">
+  <div class="container">
+    <div class="section-label">Process</div>
+    <h2>From Assessment to Action in 7 Days</h2>
+    <p class="section-sub">No waiting rooms. No guesswork. Just data-driven protocols reviewed by a licensed Ontario physician.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h3>AI-Powered Intake</h3>
+        <p>Complete a smart health assessment that adapts to your history, lifestyle, and goals. 15 minutes, online.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h3>Comprehensive Labs</h3>
+        <p>Advanced blood panel at LifeLabs. Hormones, inflammatory markers, metabolic health — beyond what OHIP covers.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h3>Personalized Protocol</h3>
+        <p>AI analyzes your biomarkers → generates optimization plan → MD reviews and signs off. Science-backed, physician-verified.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <h3>Continuous Monitoring</h3>
+        <p>Quarterly rechecks, wearable integration, AI-driven insights. Your health evolves — your protocol does too.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROTOCOLS -->
+<section class="section" style="background:#0d0d1a">
+  <div class="container">
+    <div class="section-label">Programs</div>
+    <h2>Five Core Protocols</h2>
+    <p class="section-sub">Each protocol combines diagnostics, AI analysis, and MD oversight for results you can measure.</p>
+    <div class="protocols">
+      <div class="protocol"><h4>🧬 Executive Baseline</h4><p>Lipids, HbA1c, hsCRP, full hormone panel, Vitamin D, thyroid. The foundation.</p></div>
+      <div class="protocol"><h4>⚡ Metabolic Optimization</h4><p>Insulin sensitivity, body composition, energy pathways. Peak performance.</p></div>
+      <div class="protocol"><h4>😴 Sleep & Stress</h4><p>Cortisol rhythm, HRV tracking, sleep architecture. Recover like a pro.</p></div>
+      <div class="protocol"><h4>🔄 Hormone Balance</h4><p>Testosterone, estrogen, thyroid cascade. Including menopause & perimenopause.</p></div>
+      <div class="protocol"><h4>📊 Continuity Check</h4><p>Quarterly biomarker tracking, protocol refinement, AI trend analysis.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section">
+  <div class="container">
+    <div class="section-label">Pricing</div>
+    <h2>Invest in Your Longevity</h2>
+    <p class="section-sub">Toronto executive clinics charge $5K-$20K/year. We deliver more continuity for less.</p>
+    <div class="pricing-row">
+      <div class="card">
+        <h3>Founding Assessment</h3>
+        <div class="price">$2,500<small> one-time</small></div>
+        <div class="unit">Intake + labs + personalized plan</div>
+        <ul>
+          <li>AI-powered health assessment</li>
+          <li>Advanced biomarker panel (LifeLabs)</li>
+          <li>MD-reviewed protocol</li>
+          <li>60-min physician consultation</li>
+          <li>Digital member portal access</li>
+        </ul>
+        <a href="#quiz-start" class="btn-primary">Get Started</a>
+      </div>
+      <div class="card featured">
+        <h3>Continuous Plan</h3>
+        <div class="price">$399<small>/mo</small></div>
+        <div class="unit">Most popular for sustained results</div>
+        <ul>
+          <li>Everything in Assessment</li>
+          <li>Quarterly lab rechecks</li>
+          <li>Monthly AI health insights</li>
+          <li>Protocol adjustments by MD</li>
+          <li>Wearable data integration</li>
+          <li>24/7 secure messaging</li>
+        </ul>
+        <a href="#quiz-start" class="btn-primary">Start Continuous Plan</a>
+      </div>
+      <div class="card">
+        <h3>Executive Concierge</h3>
+        <div class="price">$799<small>/mo</small></div>
+        <div class="unit">For those who want the highest touch</div>
+        <ul>
+          <li>Everything in Continuous</li>
+          <li>Monthly MD video check-ins</li>
+          <li>Priority lab processing</li>
+          <li>Custom supplement protocols</li>
+          <li>Concierge scheduling</li>
+          <li>Family add-on available</li>
+        </ul>
+        <a href="#quiz-start" class="btn-primary">Apply for Concierge</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section class="section" id="quiz-start" style="background:#0d0d1a">
+  <div class="container">
+    <div class="section-label">Start Here</div>
+    <h2>Take the 2-Minute Assessment</h2>
+    <p class="section-sub" style="margin-bottom:32px">Tell us about your goals. We'll tell you which protocol fits.</p>
+    <div class="quiz">
+      <div id="quiz-form">
+        <div class="quiz-q">
+          <label>1. What's your primary goal?</label>
+          <select id="q1">
+            <option value="">Select...</option>
+            <option value="energy">More energy & mental clarity</option>
+            <option value="longevity">Long-term healthspan extension</option>
+            <option value="performance">Peak physical & cognitive performance</option>
+            <option value="weight">Body composition & metabolic health</option>
+          </select>
+        </div>
+        <div class="quiz-q">
+          <label>2. How would you rate your current health?</label>
+          <select id="q2">
+            <option value="">Select...</option>
+            <option value="excellent">Excellent — just optimizing</option>
+            <option value="good">Good — some concerns</option>
+            <option value="fair">Fair — ready for change</option>
+            <option value="struggling">Not great — need help</option>
+          </select>
+        </div>
+        <div class="quiz-q">
+          <label>3. Age range?</label>
+          <select id="q3">
+            <option value="">Select...</option>
+            <option value="30-40">30-40</option>
+            <option value="40-50">40-50</option>
+            <option value="50-60">50-60</option>
+            <option value="60+">60+</option>
+          </select>
+        </div>
+        <button class="btn-primary" onclick="showResult()" style="width:100%;margin-top:8px">See My Recommendation →</button>
+      </div>
+      <div id="quiz-result">
+        <h3 id="result-title" style="color:#a855f7;margin-bottom:12px"></h3>
+        <p id="result-desc" style="color:#999;margin-bottom:20px"></p>
+        <a href="#" class="btn-primary" onclick="document.getElementById('quiz-form').style.display='block';document.getElementById('quiz-result').style.display='none';return false">Retake Assessment</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section" style="text-align:center">
+  <div class="container">
+    <h2 style="margin-bottom:12px">Your Next Decade Starts Now</h2>
+    <p style="color:#888;margin-bottom:32px;max-width:500px;margin-left:auto;margin-right:auto">
+      Founded by executives, for executives. Ontario-licensed, PHIPA-compliant, AI-powered.
+    </p>
+    <a href="#quiz-start" class="btn-primary">Take the Assessment →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>© 2026 PeakForm Health. All rights reserved. | <a href="#">Privacy</a> | <a href="#">Terms</a></p>
+    <p style="margin-top:8px">Physician services provided by an independent Ontario Professional Corporation.<br>Not a replacement for primary care. Results vary.</p>
+  </div>
+</footer>
+
+<script>
+function showResult(){
+  var q1=document.getElementById('q1').value;
+  var q2=document.getElementById('q2').value;
+  var q3=document.getElementById('q3').value;
+  if(!q1||!q2||!q3){alert('Please answer all questions.');return;}
+
+  var recs={
+    energy:{title:'Executive Baseline',desc:'Start with our comprehensive lab panel and MD consultation. The foundation protocol covers all systems — we\'ll identify exactly what\'s draining your energy.'},
+    longevity:{title:'Continuous Plan',desc:'Your profile indicates a long-term optimization mindset. Monthly monitoring with quarterly labs gives you the data continuity that sporadic clinic visits can\'t match.'},
+    performance:{title:'Executive Concierge',desc:'For peak performance, monthly MD check-ins and advanced protocols are the standard. Your goals require the highest-touch approach.'},
+    weight:{title:'Metabolic Protocol',desc:'Body composition is 80% biology, 20% effort. Our metabolic protocol combines advanced labs (insulin, inflammation, hormones) with a data-driven plan.'}
+  };
+
+  var r=recs[q1]||recs.energy;
+  document.getElementById('result-title').textContent='Recommended: '+r.title;
+  document.getElementById('result-desc').textContent=r.desc;
+  document.getElementById('quiz-form').style.display='none';
+  document.getElementById('quiz-result').style.display='block';
+}
+</script>
+</body>
+</html>
