@@ -877,7 +877,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 <div id="top-row">
 <input type="date" id="datePick">
 <button id="btnToday" onclick="setToday()">Today</button>
-<button class="btn-icon" onclick="toggleCalendar()" title="Calendar">📅</button>
+<button class="btn-icon" onclick="switchTab('calendar')" title="Calendar">📅</button>
 <button class="btn-icon" onclick="showTasks()" title="Tasks">📝</button>
 <button class="btn-icon" onclick="showHistory()" title="Visit History">📋</button>
 <input type="search" id="search" placeholder="🔍 Search...">
@@ -1000,7 +1000,7 @@ function drawCalendar(){var y=calYear,m=calMonth,first=new Date(y,m,1),last=new 
 function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}drawCalendar();}
 function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}drawCalendar();}
 function calPick(date){activeDate=date;document.getElementById("datePick").value=activeDate;filters.status="scheduled";document.getElementById("statusFilter").value="scheduled";document.getElementById("calPanel").classList.remove("open");refreshMarkers();doFilter();renderDay();showRoute();drawCalendar();}
-function toggleCalendar(){document.getElementById("calPanel").classList.toggle("open");if(document.getElementById("calPanel").classList.contains("open"))drawCalendar();}
+function toggleCalendar(){switchTab("calendar");}
 function renderDay(){var stops=getStops(),h="",title=document.getElementById("dayTitle"),panel=document.getElementById("dayBar");if(stops.length===0){title.textContent="\ud83d\udcc5 "+fmtDate(activeDate)+" \u00b7 No stops";panel.classList.remove("has-stops");h='<div style="padding:15px;text-align:center;color:#666"><p style="font-size:28px">\ud83d\udcc5</p><p>No stops for '+fmtDate(activeDate)+'</p><p style="font-size:11px;margin-top:6px">Tap "+ Add" on any marker, or use <b>Select</b> mode.</p></div>';}else{var td=0;h='<div class="day-list">';stops.forEach(function(idx,i){var l=LEADS[idx],dist="";if(i>0){dist=haversine(LEADS[stops[i-1]][5],LEADS[stops[i-1]][6],l[5],l[6]).toFixed(1)+" km";td+=parseFloat(dist);}h+='<div class="day-stop" data-si="'+i+'" onclick="openLead('+idx+')" style="cursor:pointer"><div class="day-grip" onclick="event.stopPropagation()" onmousedown="dStart(event,'+i+')" ontouchstart="dStart(event,'+i+')">\u2630</div><div class="day-num">'+(i+1)+'</div><div class="day-info"><div class="day-name">'+l[0]+'</div><div class="day-meta">'+l[1]+' \u00b7 '+l[2]+'</div></div><div class="day-dist">'+(dist?dist:"Start")+'</div><button class="day-remove" onclick="event.stopPropagation();removeStop('+idx+')">\u2715</button></div>';});h+='</div>';h+='<div class="day-foot">\u2194 Total: ~'+td.toFixed(1)+" km \u00b7 "+stops.length+" stop"+(stops.length>1?"s":"");h+=' <button onclick="optimizeDay()" style="margin-left:8px">\ud83d\udccd Optimize</button>';h+=' <button onclick="exportDay()" style="margin-left:4px;background:#3498db">\ud83d\udcc4 Export</button></div>';title.textContent="\ud83d\udcc5 "+fmtDate(activeDate)+" \u00b7 "+stops.length+" stop"+(stops.length>1?"s":"")+" \u00b7 ~"+td.toFixed(0)+"km";panel.classList.add("has-stops");}document.getElementById("dayBody").innerHTML=h;setupDrag();}
 function removeStop(idx){var stops=getStops(),p=stops.indexOf(idx);if(p>=0){stops.splice(p,1);if(stops.length===0)delete schedule[activeDate];}saveSched();renderDay();showRoute();refreshMarkers();}
 function toggleDay(){document.getElementById("dayBar").classList.toggle("open");renderDay();}
