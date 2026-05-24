@@ -119,14 +119,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 
 @media(max-width:420px){#panel{max-width:100%}.slide-panel{max-width:100%}#datePick{width:120px;font-size:13px}#search{font-size:13px}}
 </style>
-<style>#topbar{display:none !important}
-#floatCtrl{display:none;position:absolute;top:8px;left:8px;right:8px;z-index:1001;flex-wrap:wrap;gap:6px;align-items:center}
-#floatCtrl.show{display:flex}
-#floatCtrl input[type=date]{flex:1;min-width:100px;padding:8px 6px;background:rgba(26,26,46,0.95);border:1px solid #333;color:#ddd;border-radius:6px;font-size:13px;font-family:inherit}
-#floatCtrl input[type=search]{flex:2;min-width:120px;padding:8px 10px;background:rgba(26,26,46,0.95);border:1px solid #333;color:#ddd;border-radius:6px;font-size:13px;font-family:inherit}
-#floatCtrl button{background:rgba(26,26,46,0.95);border:1px solid #333;color:#ddd;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;white-space:nowrap}
-#floatCtrl .fc-badge{background:#f39c12;color:#000;padding:2px 6px;border-radius:8px;font-size:10px;font-weight:700}
-
+<style>#topbar{display:none}
 /* === TAB BAR === */
 #tabBar{position:absolute;bottom:0;left:0;right:0;z-index:1002;background:rgba(15,15,26,0.98);border-top:1px solid #2a2a3e;display:flex;padding:2px 4px env(safe-area-inset-bottom)}
 .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 2px;background:none;border:none;color:#888;cursor:pointer;font-size:10px;font-family:inherit;gap:2px;transition:color 0.15s;-webkit-tap-highlight-color:transparent;position:relative}
@@ -190,7 +183,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 .cal-wk-day .wk-bar{height:3px;background:#252540;border-radius:2px;margin-top:4px;overflow:hidden}
 .cal-wk-day .wk-bar-f{height:100%;background:#f39c12;border-radius:2px}
 
-/* Month grid in calendar tab */
+/* Month grid */
 .cal-month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center}
 .cal-month-grid .mg-hdr{font-size:10px;color:#888;padding:4px 0}
 .cal-month-day{background:#1a1a2e;padding:8px 2px;border-radius:6px;cursor:pointer;min-height:44px;position:relative}
@@ -883,8 +876,6 @@ svg.leaflet-image-layer.leaflet-interactive path {
 <button class="btn-reset" onclick="resetFilters()">↺ Reset</button>
 <button id="restoreHiddenBtn" onclick="restoreHidden()">🔄 Restore</button>
 <button style="padding:5px 8px;background:#3498db;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:11px" onclick="exportCSV()">📥 CSV</button>
-
-<div id="floatCtrl"><input type="date" id="fcDate"><button onclick="setToday()">Today</button><input type="search" id="fcSearch" placeholder="🔍 Search..."><button onclick="toggleSelectMode()" id="fcSelect">☑ Select</button><button onclick="toggleFilters()" id="fcFilter">⚙</button><span class="fc-badge" id="fcCount"></span></div>
 </div>
 </div>
 <div id="batchBar"><span>0 selected</span><button onclick="batchAddToDay()">Add to Day</button><button onclick="toggleSelectMode()" style="background:#555">Cancel</button></div>
@@ -1033,58 +1024,57 @@ function switchTab(tab){
   if(tab!=='tasks')closeTasks();
   if(tab!=='more')closeHistory();
 
-  var m=document.getElementById('map');
-  var d=document.getElementById('dayBar');
-  var f=document.getElementById('floatCtrl');
-  var l=document.getElementById('legend');
-  var t=document.getElementById('topbar');
-  var b=document.getElementById('batchBar');
-
-  // Always hide topbar
-  if(t)t.style.display='none';
-  if(b&&tab!=='map')b.style.display='none';
+  var elM=document.getElementById('map');
+  var elD=document.getElementById('dayBar');
+  var elL=document.getElementById('legend');
+  var elT=document.getElementById('topbar');
+  var elB=document.getElementById('batchBar');
 
   if(tab==='map'){
-    if(m)m.style.display='';if(d)d.style.display='';if(l)l.style.display='';
-    if(f)f.classList.add('show');
-    if(typeof map!=='undefined'&&map)setTimeout(function(){map.invalidateSize();},200);
-    syncFloatCtrl();
+    // Show topbar on map tab - ALL original filters work
+    if(elT)elT.style.display='';
+    if(elM)elM.style.display='';
+    if(elD)elD.style.display='';
+    if(elL)elL.style.display='';
+    if(elB&&typeof selectMode!=='undefined'&&selectMode)elB.style.display='flex';else if(elB)elB.style.display='none';
+    if(typeof map!=='undefined'&&map)setTimeout(function(){map.invalidateSize();},300);
+    // Refresh markers via doFilter
+    if(typeof doFilter==='function')setTimeout(doFilter,400);
     if(typeof renderDay==='function')renderDay();
-  }else if(tab==='leads'){
-    if(m)m.style.display='none';if(d)d.style.display='none';if(l)l.style.display='none';
-    if(f)f.classList.remove('show');
-    var lv=document.getElementById('leadsView');if(lv){lv.classList.add('open');populateLeadsFilters();populateLeadsTable();}
-  }else if(tab==='calendar'){
-    if(m)m.style.display='';if(d)d.style.display='';if(l)l.style.display='none';
-    if(f)f.classList.remove('show');
-    if(typeof map!=='undefined'&&map)setTimeout(function(){map.invalidateSize();},200);
-    var cv=document.getElementById('calTabView');if(cv){cv.classList.add('open');calRefresh_();calSetView_('day');}
-  }else if(tab==='tasks'){
-    if(m)m.style.display='';if(d)d.style.display='';if(l)l.style.display='none';
-    if(f)f.classList.remove('show');
-    if(typeof map!=='undefined'&&map)setTimeout(function(){map.invalidateSize();},200);
-    showTasks();
-  }else if(tab==='more'){
-    if(m)m.style.display='none';if(d)d.style.display='none';if(l)l.style.display='none';
-    if(f)f.classList.remove('show');
-    var lv=document.getElementById('leadsView');if(lv){lv.classList.add('open');showMoreMenu();}
+  }else{
+    // Hide topbar on all other tabs
+    if(elT)elT.style.display='none';
+    if(elB)elB.style.display='none';
+    
+    if(tab==='leads'){
+      if(elM)elM.style.display='none';if(elD)elD.style.display='none';if(elL)elL.style.display='none';
+      var lv=document.getElementById('leadsView');if(lv){lv.classList.add('open');populateLeadsFilters();populateLeadsTable();}
+    }else if(tab==='calendar'){
+      if(elM)elM.style.display='';if(elD)elD.style.display='';if(elL)elL.style.display='none';
+      if(typeof map!=='undefined'&&map)setTimeout(function(){map.invalidateSize();},200);
+      var cv=document.getElementById('calTabView');if(cv){cv.classList.add('open');calRefresh_();calSetView_('day');}
+    }else if(tab==='tasks'){
+      if(elM)elM.style.display='';if(elD)elD.style.display='';if(elL)elL.style.display='none';
+      if(typeof map!=='undefined'&&map)setTimeout(function(){map.invalidateSize();},200);
+      showTasks();
+    }else if(tab==='more'){
+      if(elM)elM.style.display='none';if(elD)elD.style.display='none';if(elL)elL.style.display='none';
+      var lv=document.getElementById('leadsView');if(lv){lv.classList.add('open');showMoreMenu();}
+    }
   }
   updateTaskBadge();
 }
 
-/* Sync floating controls with original topbar values */
-function syncFloatCtrl(){
-  var fcD=document.getElementById('fcDate');
-  var fcS=document.getElementById('fcSearch');
-  var fcC=document.getElementById('fcCount');
-  var origD=document.getElementById('datePick');
-  var origS=document.getElementById('search');
-  var origC=document.getElementById('counter');
-  if(fcD&&origD)fcD.value=origD.value;
-  if(fcS&&origS){fcS.value=origS.value;fcS.oninput=function(){origS.value=this.value;if(typeof doFilter==='function')doFilter();};}
-  if(fcC&&origC)fcC.textContent=origC.textContent;
-  if(fcD){fcD.onchange=function(){origD.value=this.value;if(typeof setDate==='function')setDate(this.value);};}
-}
+// When opening a lead from calendar/leads tab, sync calendar date to map
+var origOpenLead=openLead;
+openLead=function(idx){
+  // If coming from calendar, sync the date
+  if(currentTab==='calendar'&&typeof calDate_!=='undefined'){
+    var ds=fmtISODate_(calDate_);
+    if(typeof setDate==='function')setDate(ds);
+  }
+  origOpenLead(idx);
+};
 
 /* --- LEADS TABLE --- */
 function populateLeadsFilters(){
@@ -1136,18 +1126,15 @@ var calDate_=new Date();
 var calMode_='day';
 
 function calRefresh_(){
-  // Re-read from localStorage
   try{var s=JSON.parse(localStorage.getItem('jpro_schedule')||'{}');for(var k in s)schedule[k]=s[k];}catch(e){}
   try{var td=JSON.parse(localStorage.getItem('jpro_taskDone')||'{}');for(var k in td)taskDone[k]=td[k];}catch(e){}
 }
 
-function fmtISODate(d){var y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),da=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+da;}
+function fmtISODate_(d){var y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),da=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+da;}
 
 function calSetView_(mode){
   calMode_=mode;
-  document.getElementById('calVDay').classList.remove('active');
-  document.getElementById('calVWeek').classList.remove('active');
-  document.getElementById('calVMonth').classList.remove('active');
+  ['calVDay','calVWeek','calVMonth'].forEach(function(id){document.getElementById(id).classList.remove('active');});
   document.getElementById('calV'+mode.charAt(0).toUpperCase()+mode.slice(1)).classList.add('active');
   calRender_();
 }
@@ -1170,7 +1157,7 @@ function calRender_(){
 }
 
 function calDayView_(body){
-  var ds=fmtISODate(calDate_);
+  var ds=fmtISODate_(calDate_);
   var dn=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   document.getElementById('calVLabel').textContent=dn[calDate_.getDay()]+', '+mn[calDate_.getMonth()]+' '+calDate_.getDate()+', '+calDate_.getFullYear();
@@ -1181,10 +1168,9 @@ function calDayView_(body){
   
   if(stops.length===0){
     h.push('<div class="cal-no-stops">No stops scheduled for '+ds);
-    // Find nearest
     var allDates=Object.keys(schedule).filter(function(k){return schedule[k].length>0;}).sort();
     if(allDates.length>0){
-      h.push('<br><br>You have stops on:');
+      h.push('<br><br>Scheduled dates:');
       for(var i=0;i<allDates.length;i++){
         h.push('<br><span class="cal-nav-hint" onclick="calDate_=new Date(\''+allDates[i]+'T12:00:00\');calSetView_(\'day\')">'+allDates[i]+' ('+schedule[allDates[i]].length+' stop'+(schedule[allDates[i]].length>1?'s':'')+')</span>');
       }
@@ -1210,26 +1196,25 @@ function calWeekView_(body){
   var mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   document.getElementById('calVLabel').textContent=mn[mon.getMonth()]+' '+mon.getDate()+'\u2013'+mn[sun.getMonth()]+' '+sun.getDate()+', '+sun.getFullYear();
 
-  var today=fmtISODate(new Date());
+  var today=fmtISODate_(new Date());
   var dow=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   var h=['<div class="cal-wk-row">'];
   for(var i=0;i<7;i++){
     var day=new Date(mon);day.setDate(day.getDate()+i);
-    var ds=fmtISODate(day);
+    var ds=fmtISODate_(day);
     var stops=schedule[ds]||[];
     var done=taskDone[ds]||[];var dc=0;
     for(var j=0;j<stops.length;j++){if(done.indexOf(stops[j])>=0)dc++;}
     var pct=stops.length?Math.round(dc/stops.length*100):0;
-    var cls=['cal-wk-day'];if(ds===today)cls.push('tdy');if(ds===fmtISODate(calDate_))cls.push('sel');
-    h.push('<div class="'+cls.join(' ')+'" onclick="calDate_=new Date(\''+ds+'T12:00:00\');calSetView_(\'day\')"><div class="wk-dow">'+dow[i]+'</div><div class="wk-num">'+day.getDate()+'</div>'+(stops.length?'<div class="wk-cnt">'+stops.length+' stop'+(stops.length>1?'s':'')+'</div><div class="wk-bar"><div class="wk-bar-f" style="width:'+pct+'%"></div></div>':'<div class="wk-cnt" style="color:#555">\u2014</div>')+'</div>');
+    var cls=['cal-wk-day'];if(ds===today)cls.push('tdy');if(ds===fmtISODate_(calDate_))cls.push('sel');
+    h.push('<div class="'+cls.join(' ')+'" onclick="calDate_=new Date(\''+ds+'T12:00:00\');calSetView_(\'day\')"><div class="wk-dow">'+dow[i]+'</div><div class="wk-num">'+day.getDate()+'</div>'+(stops.length?'<div class="wk-cnt">'+stops.length+'</div><div class="wk-bar"><div class="wk-bar-f" style="width:'+pct+'%"></div></div>':'<div class="wk-cnt" style="color:#555">\u2014</div>')+'</div>');
   }
   h.push('</div>');
   
-  // List all stops for the week
   var any=false;
   for(var i=0;i<7;i++){
     var day=new Date(mon);day.setDate(day.getDate()+i);
-    var ds=fmtISODate(day);
+    var ds=fmtISODate_(day);
     var stops=schedule[ds]||[];
     if(stops.length===0)continue;
     any=true;
@@ -1249,7 +1234,7 @@ function calMonthView_(body){
   var mn=['January','February','March','April','May','June','July','August','September','October','November','December'];
   document.getElementById('calVLabel').textContent=mn[calDate_.getMonth()]+' '+calDate_.getFullYear();
 
-  var today=fmtISODate(new Date());
+  var today=fmtISODate_(new Date());
   var y=calDate_.getFullYear(),m=calDate_.getMonth();
   var firstDay=new Date(y,m,1);
   var startDow=(firstDay.getDay()+6)%7;
@@ -1259,11 +1244,11 @@ function calMonthView_(body){
   for(var i=0;i<7;i++)h.push('<div class="mg-hdr">'+dow[i]+'</div>');
   for(var i=0;i<startDow;i++)h.push('<div></div>');
   for(var d=1;d<=daysInMonth;d++){
-    var date=new Date(y,m,d),ds=fmtISODate(date);
+    var date=new Date(y,m,d),ds=fmtISODate_(date);
     var stops=schedule[ds]||[];
     var done=taskDone[ds]||[];var dc=0;
     for(var j=0;j<stops.length;j++){if(done.indexOf(stops[j])>=0)dc++;}
-    var cls=['cal-month-day'];if(ds===today)cls.push('tdy');if(ds===fmtISODate(calDate_))cls.push('sel');
+    var cls=['cal-month-day'];if(ds===today)cls.push('tdy');if(ds===fmtISODate_(calDate_))cls.push('sel');
     var dots='';
     if(stops.length>0){
       for(var j=0;j<stops.length;j++)dots+='<span class="md-dot'+(done.indexOf(stops[j])>=0?' md-done':'')+'"></span>';
@@ -1285,7 +1270,7 @@ function showMoreMenu(){
   h.push('<button style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #444;color:#ddd;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit" onclick="exportCSV()">📥 Export All Leads (CSV)</button>');
   h.push('<button style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #444;color:#ddd;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit" onclick="resetFilters();switchTab(\'map\')">↺ Reset All Filters</button>');
   if(hidden.size>0)h.push('<button style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #e67e22;color:#e67e22;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit" onclick="restoreHidden();switchTab(\'map\')">🔄 Restore '+hidden.size+' Hidden</button>');
-  h.push('<div style="margin-top:16px;padding:12px;background:#1a1a2e;border-radius:8px;font-size:12px;color:#888"><strong>JPRO CRM v24</strong><br>'+LEADS.length+' leads \u2022 '+Object.keys(iColors).length+' industries</div>');
+  h.push('<div style="margin-top:16px;padding:12px;background:#1a1a2e;border-radius:8px;font-size:12px;color:#888"><strong>JPRO CRM v25</strong><br>'+LEADS.length+' leads \u2022 '+Object.keys(iColors).length+' industries</div>');
   h.push('</div>');
   wrap.innerHTML=h.join('');
 }
