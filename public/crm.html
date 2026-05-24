@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>JPRO CRM v20.2</title>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>JPRO CRM v20.3</title>
 <style>*{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0f0f1a;color:#ddd;height:100vh;overflow:hidden}
 #map{width:100%;height:100%}
@@ -55,16 +55,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 #legend{position:absolute;bottom:50px;left:8px;z-index:999;background:rgba(15,15,26,0.9);padding:6px 8px;border-radius:6px;border:1px solid #2a2a3e;font-size:10px;max-height:180px;overflow-y:auto;max-width:200px}
 .li{display:flex;align-items:center;gap:5px;padding:1px 0;color:#aaa}.dot{width:8px;height:8px;border-radius:50%}
 
-/* HISTORY PANEL */
-#histPanel{position:fixed;top:0;right:0;width:100%;max-width:420px;height:100%;background:#1a1a2e;z-index:2100;transform:translateX(100%);transition:transform 0.3s;overflow-y:auto;display:flex;flex-direction:column}
-#histPanel.open{transform:translateX(0)}
-.hist-header{display:flex;justify-content:space-between;align-items:center;padding:12px 15px;border-bottom:1px solid #2a2a3e;position:sticky;top:0;background:#1a1a2e;z-index:1}
-#histBody{padding:12px;flex:1}
-.hist-entry{background:#252540;padding:10px 12px;border-radius:6px;margin-bottom:6px;cursor:pointer;border-left:3px solid #f39c12}
-.hist-entry:active{background:#2a2a4e}
-.hist-date{font-size:10px;color:#f39c12;margin-bottom:3px}
-.hist-lead{font-size:13px;font-weight:600;color:#fff;margin-bottom:3px}
-.hist-note{font-size:11px;color:#aaa;line-height:1.4}
+/* SHARED PANEL STYLES (history + tasks) */
+.slide-panel{position:fixed;top:0;right:0;width:100%;max-width:420px;height:100%;background:#1a1a2e;z-index:2100;transform:translateX(100%);transition:transform 0.3s;overflow-y:auto;display:flex;flex-direction:column}
+.slide-panel.open{transform:translateX(0)}
+.slide-header{display:flex;justify-content:space-between;align-items:center;padding:12px 15px;border-bottom:1px solid #2a2a3e;position:sticky;top:0;background:#1a1a2e;z-index:1}
+.slide-body{padding:12px;flex:1}
+.task-group{margin-bottom:12px}
+.task-group-date{font-size:13px;font-weight:600;color:#e67e22;margin-bottom:4px;border-bottom:1px solid #2a2a3e;padding-bottom:4px}
+.task-entry{background:#252540;padding:10px 12px;border-radius:6px;margin-bottom:4px;cursor:pointer;border-left:3px solid #e67e22}
+.task-entry:active{background:#2a2a4e}
+.task-lead{font-size:13px;font-weight:600;color:#fff;margin-bottom:2px}
+.task-sub{font-size:10px;color:#888}
+.task-date{font-size:10px;color:#f39c12;margin-bottom:3px}
+
+/* HISTORY uses orange border */
+#histPanel .task-entry{border-left-color:#f39c12}
+#histPanel .task-date{color:#f39c12}
 
 /* LEAD PANEL */
 #panel{position:fixed;top:0;right:0;width:100%;max-width:420px;height:100%;background:#1a1a2e;z-index:2000;transform:translateX(100%);transition:transform 0.3s;overflow-y:auto;display:flex;flex-direction:column}
@@ -98,7 +104,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 #errMsg{display:none;color:#e74c3c;font-size:12px;max-width:300px;text-align:center;white-space:pre-wrap}
 #restoreHiddenBtn{display:none;padding:4px 8px;background:#7f8c8d;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px}
 
-@media(max-width:420px){#panel{max-width:100%}#histPanel{max-width:100%}#datePick{width:120px;font-size:13px}#search{font-size:13px}}
+@media(max-width:420px){#panel{max-width:100%}.slide-panel{max-width:100%}#datePick{width:120px;font-size:13px}#search{font-size:13px}}
 </style>
 <style>/* required styles */
 
@@ -770,6 +776,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 <button id="btnToday" onclick="setToday()">Today</button>
 <button class="btn-icon" onclick="toggleCalendar()" title="Calendar">📅</button>
 <button class="btn-icon" onclick="showHistory()" title="Visit History">📋</button>
+<button class="btn-icon" onclick="showTasks()" title="Tasks">📝</button>
 <input type="search" id="search" placeholder="🔍 Search...">
 <button id="btnSelect" class="btn-icon" onclick="toggleSelectMode()" title="Batch select">☑</button>
 <button id="btnFilter" class="btn-icon" onclick="toggleFilters()">⚙</button>
@@ -795,7 +802,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
 </div>
 <div id="dayBody"></div>
 </div>
-<div id="histPanel"><div class="hist-header"><h2 style="color:#f39c12;font-size:15px">📋 Visit History</h2><button class="close-btn" onclick="closeHistory()">✕</button></div><div id="histBody"></div></div>
+<div id="histPanel" class="slide-panel"><div class="slide-header"><h2 style="color:#f39c12;font-size:15px">📋 Visit History</h2><button class="close-btn" onclick="closeHistory()">✕</button></div><div id="histBody" class="slide-body"></div></div>
+<div id="taskPanel" class="slide-panel"><div class="slide-header"><h2 style="color:#e67e22;font-size:15px">📝 Tasks</h2><button class="close-btn" onclick="closeTasks()">✕</button></div><div id="taskBody" class="slide-body"></div></div>
 <div id="panel"><div class="panel-header"><h2 id="panelTitle">Lead Details</h2><button class="close-btn" onclick="closePanel()">✕</button></div><div id="panelBody"></div></div>
 <script>/* @preserve
  * Leaflet 1.9.4, a JS library for interactive maps. https://leafletjs.com
@@ -820,6 +828,8 @@ var calYear=null,calMonth=null;
 function haversine(a,b,c,d){var R=6371,x=(c-a)*Math.PI/180,y=(d-b)*Math.PI/180,e=Math.sin(x/2)*Math.sin(x/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(y/2)*Math.sin(y/2);return R*2*Math.atan2(Math.sqrt(e),Math.sqrt(1-e));}
 function fmtDate(d){if(!d)return"";var p=d.split("-");return["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][+p[1]-1]+" "+p[2];}
 function fmtDateTime(t){var d=new Date(t);return d.toLocaleDateString(undefined,{month:"short",day:"numeric"})+" "+d.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"});}
+function daysFromNow(d){var dt=new Date(d+"T00:00:00"),now=new Date();now.setHours(0,0,0,0);return Math.round((dt-now)/86400000);}
+function addDays(d,n){var dt=new Date(d+"T00:00:00");dt.setDate(dt.getDate()+n);return dt.toISOString().slice(0,10);}
 function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function getColor(ind){for(var k in iColors)if(ind.indexOf(k)>=0)return iColors[k];return"#999";}
 function getStops(date){var d=date||activeDate;return schedule[d]||[];}
@@ -832,8 +842,10 @@ function toggleSelectMode(){selectMode=!selectMode;selected.clear();document.get
 function toggleSelect(idx){if(selected.has(idx))selected.delete(idx);else selected.add(idx);updateBatchBar();refreshMarkers();}
 function batchAddToDay(){if(selected.size===0)return;var stops=schedule[activeDate];if(!stops)schedule[activeDate]=stops=[];selected.forEach(function(idx){if(stops.indexOf(idx)<0)stops.push(idx);});saveSched();selected.clear();selectMode=false;document.getElementById("btnSelect").classList.remove("on");document.getElementById("batchBar").style.display="none";renderDay();showRoute();refreshMarkers();}
 function updateBatchBar(){var b=document.getElementById("batchBar");b.innerHTML='<span>'+selected.size+' selected</span><button onclick="batchAddToDay()">+ Add to '+fmtDate(activeDate)+'</button><button onclick="toggleSelectMode()" style="background:#555">Cancel</button>';if(selectMode)b.style.display="flex";}
-function showHistory(){var all=[];Object.keys(visits).forEach(function(k){var idx=parseInt(k.slice(1));if(hidden.has(idx))return;var v=visits[k];if(!v.visits||v.visits.length===0)return;v.visits.forEach(function(vi){all.push({idx:idx,lead:LEADS[idx],t:vi.t,n:vi.n});});});all.sort(function(a,b){return b.t.localeCompare(a.t);});var h='<h3 style="margin-bottom:10px;color:#f39c12">\ud83d\udcdd Visit History</h3>';if(all.length===0){h+='<p style="color:#888;text-align:center;padding:20px">No logged visits yet.</p>';}else{all.forEach(function(v){h+='<div class="hist-entry" onclick="openLead('+v.idx+')"><div class="hist-date">'+fmtDateTime(v.t)+'</div><div class="hist-lead">'+v.lead[0]+'</div><div class="hist-note">'+v.n.replace(/\n/g,"<br>")+'</div></div>';});}document.getElementById("histBody").innerHTML=h;document.getElementById("histPanel").classList.add("open");}
+function showHistory(){var all=[];Object.keys(visits).forEach(function(k){var idx=parseInt(k.slice(1));if(hidden.has(idx))return;var v=visits[k];if(!v.visits||v.visits.length===0)return;v.visits.forEach(function(vi){all.push({idx:idx,lead:LEADS[idx],t:vi.t,n:vi.n});});});all.sort(function(a,b){return b.t.localeCompare(a.t);});var h='<h3 style="margin-bottom:10px;color:#f39c12">\ud83d\udcdd Visit History</h3>';if(all.length===0){h+='<p style="color:#888;text-align:center;padding:20px">No logged visits yet.</p>';}else{all.forEach(function(v){h+='<div class="task-entry" onclick="openLead('+v.idx+')"><div class="task-date">'+fmtDateTime(v.t)+'</div><div class="task-lead">'+v.lead[0]+'</div><div class="task-note">'+v.n.replace(/\n/g,"<br>")+'</div></div>';});}document.getElementById("histBody").innerHTML=h;document.getElementById("histPanel").classList.add("open");}
 function closeHistory(){document.getElementById("histPanel").classList.remove("open");}
+function showTasks(){var h='<h3 style="margin-bottom:10px;color:#e67e22">\ud83d\udcdd Follow-up Tasks</h3>';var future=Object.keys(schedule).filter(function(d){return d>=today;}).sort();if(future.length===0){h+='<p style="color:#888;text-align:center;padding:20px">No upcoming follow-ups. Log a visit to auto-create tasks.</p>';}else{future.forEach(function(d){var stops=schedule[d],days=daysFromNow(d),label=days===0?"Today":(days===1?"Tomorrow":"in "+days+" days");h+='<div class="task-group"><div class="task-group-date">'+fmtDate(d)+' <span style="color:'+(days<=2?"#e74c3c":"#f39c12")+'">('+label+')</span></div>';stops.forEach(function(idx){var l=LEADS[idx];h+='<div class="task-entry" onclick="openLead('+idx+')"><div class="task-lead">'+l[0]+'</div><div class="task-sub">'+l[1]+' \u00b7 '+l[2]+'</div></div>';});h+='</div>';});}document.getElementById("taskBody").innerHTML=h;document.getElementById("taskPanel").classList.add("open");}
+function closeTasks(){document.getElementById("taskPanel").classList.remove("open");}
 function init(){try{document.getElementById("datePick").value=activeDate;document.getElementById("datePick").addEventListener("change",function(){setDate(this.value);});INDUSTRIES.forEach(function(i){document.getElementById("indFilter").innerHTML+='<option value="'+i+'">'+i+'</option>';});CITIES.forEach(function(c){document.getElementById("cityFilter").innerHTML+='<option value="'+c+'">'+c+'</option>';});map=L.map("map",{zoomControl:false,doubleClickZoom:true}).setView([44,-78.8],9);L.control.zoom({position:"bottomright"}).addTo(map);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:17,attribution:"&copy; OSM"}).addTo(map);L.polyline([[43.6,-79.41],[44.5,-79.41]],{color:"#e74c3c",weight:2,dashArray:"8,8",opacity:0.4}).addTo(map);L.marker([43.96,-79.41],{icon:L.divIcon({html:'<div style="background:#e74c3c;color:#fff;padding:3px 10px;border-radius:4px;font-weight:bold;font-size:10px;border:2px solid #fff">\u2b05 YONGE ST</div>',iconSize:[150,20],iconAnchor:[150,10]})}).addTo(map);addMarkers();buildLegend();doFilter();renderDay();showRoute();renderCalendar();clearTimeout(loadTimeout);document.getElementById("load").style.display="none";}catch(e){showError(e.message);}}
 function addMarkers(){markers=[];LEADS.forEach(function(l,i){if(hidden.has(i))return;var c=sc[(visits["l"+i]||{status:0}).status];var sel=selectMode&&selected.has(i);var icon=L.divIcon({html:'<div style="background:'+getColor(l[1])+';width:14px;height:14px;border-radius:50%;border:3px solid '+c+';box-shadow:0 0 4px rgba(0,0,0,.5);position:relative">'+(sel?'<div style="position:absolute;top:-4px;right:-8px;background:#27ae60;color:#fff;border-radius:50%;width:16px;height:16px;font-size:10px;line-height:16px;text-align:center;border:1px solid #fff">\u2713</div>':"")+'</div>',iconSize:[20,20],iconAnchor:[10,10]});var mk=L.marker([l[5],l[6]],{icon:icon}).addTo(map);if(selectMode){mk.on("click",function(){toggleSelect(i);});}else{mk.bindPopup('<b>'+l[0]+'</b><br><small>'+l[1]+' \u00b7 '+l[2]+'</small><br><div style="display:flex;gap:5px;margin-top:4px"><button onclick="openLead('+i+')" style="flex:1;background:#f39c12;color:#1a1a2e;border:none;padding:5px;border-radius:3px;cursor:pointer;font-weight:600;font-size:12px">Open</button><button onclick="toggleStop('+i+');" style="flex:1;border:none;padding:5px;border-radius:3px;cursor:pointer;font-weight:600;font-size:12px">'+(isStop(i)?"\u2715 Remove":"+ Add")+'</button></div>');}mk._i=i;markers.push(mk);});}
 function refreshMarkers(){try{var c=map.getCenter(),z=map.getZoom();map.remove();map=L.map(document.getElementById("map"),{zoomControl:false,doubleClickZoom:true}).setView([c.lat,c.lng],z);L.control.zoom({position:"bottomright"}).addTo(map);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:17,attribution:"&copy; OSM"}).addTo(map);L.polyline([[43.6,-79.41],[44.5,-79.41]],{color:"#e74c3c",weight:2,dashArray:"8,8",opacity:0.4}).addTo(map);L.marker([43.96,-79.41],{icon:L.divIcon({html:'<div style="background:#e74c3c;color:#fff;padding:3px 10px;border-radius:4px;font-weight:bold;font-size:10px;border:2px solid #fff">\u2b05 YONGE ST</div>',iconSize:[150,20],iconAnchor:[150,10]})}).addTo(map);addMarkers();showRoute();}catch(e){showError(e.message);}}
@@ -850,7 +862,7 @@ function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}drawCalendar
 function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}drawCalendar();}
 function calPick(date){activeDate=date;document.getElementById("datePick").value=activeDate;filters.status="scheduled";document.getElementById("statusFilter").value="scheduled";document.getElementById("calPanel").classList.remove("open");refreshMarkers();doFilter();renderDay();showRoute();drawCalendar();}
 function toggleCalendar(){document.getElementById("calPanel").classList.toggle("open");if(document.getElementById("calPanel").classList.contains("open"))drawCalendar();}
-function renderDay(){var stops=getStops(),h="",title=document.getElementById("dayTitle"),panel=document.getElementById("dayBar");if(stops.length===0){title.textContent="\ud83d\udcc5 "+fmtDate(activeDate)+" \u00b7 No stops";panel.classList.remove("has-stops");h='<div style="padding:15px;text-align:center;color:#666"><p style="font-size:28px">\ud83d\udcc5</p><p>No stops for '+fmtDate(activeDate)+'</p><p style="font-size:11px;margin-top:6px">Tap "+ Add" on any marker, or use <b>Select</b> mode for batch.</p></div>';}else{var td=0;h='<div class="day-list">';stops.forEach(function(idx,i){var l=LEADS[idx],dist="";if(i>0){dist=haversine(LEADS[stops[i-1]][5],LEADS[stops[i-1]][6],l[5],l[6]).toFixed(1)+" km";td+=parseFloat(dist);}h+='<div class="day-stop" data-si="'+i+'" onclick="openLead('+idx+')" style="cursor:pointer"><div class="day-grip" onclick="event.stopPropagation()" onmousedown="dStart(event,'+i+')" ontouchstart="dStart(event,'+i+')">\u2630</div><div class="day-num">'+(i+1)+'</div><div class="day-info"><div class="day-name">'+l[0]+'</div><div class="day-meta">'+l[1]+' \u00b7 '+l[2]+'</div></div><div class="day-dist">'+(dist?dist:"Start")+'</div><button class="day-remove" onclick="event.stopPropagation();removeStop('+idx+')">\u2715</button></div>';});h+='</div>';h+='<div class="day-foot">\u2194 Total: ~'+td.toFixed(1)+" km \u00b7 "+stops.length+" stop"+(stops.length>1?"s":"");h+=' <button onclick="optimizeDay()" style="margin-left:8px">\ud83d\udccd Optimize</button>';h+=' <button onclick="exportDay()" style="margin-left:4px;background:#3498db">\ud83d\udcc4 Export</button></div>';title.textContent="\ud83d\udcc5 "+fmtDate(activeDate)+" \u00b7 "+stops.length+" stop"+(stops.length>1?"s":"")+" \u00b7 ~"+td.toFixed(0)+"km";panel.classList.add("has-stops");}document.getElementById("dayBody").innerHTML=h;setupDrag();}
+function renderDay(){var stops=getStops(),h="",title=document.getElementById("dayTitle"),panel=document.getElementById("dayBar");if(stops.length===0){title.textContent="\ud83d\udcc5 "+fmtDate(activeDate)+" \u00b7 No stops";panel.classList.remove("has-stops");h='<div style="padding:15px;text-align:center;color:#666"><p style="font-size:28px">\ud83d\udcc5</p><p>No stops for '+fmtDate(activeDate)+'</p><p style="font-size:11px;margin-top:6px">Tap "+ Add" on any marker, or use <b>Select</b> mode.</p></div>';}else{var td=0;h='<div class="day-list">';stops.forEach(function(idx,i){var l=LEADS[idx],dist="";if(i>0){dist=haversine(LEADS[stops[i-1]][5],LEADS[stops[i-1]][6],l[5],l[6]).toFixed(1)+" km";td+=parseFloat(dist);}h+='<div class="day-stop" data-si="'+i+'" onclick="openLead('+idx+')" style="cursor:pointer"><div class="day-grip" onclick="event.stopPropagation()" onmousedown="dStart(event,'+i+')" ontouchstart="dStart(event,'+i+')">\u2630</div><div class="day-num">'+(i+1)+'</div><div class="day-info"><div class="day-name">'+l[0]+'</div><div class="day-meta">'+l[1]+' \u00b7 '+l[2]+'</div></div><div class="day-dist">'+(dist?dist:"Start")+'</div><button class="day-remove" onclick="event.stopPropagation();removeStop('+idx+')">\u2715</button></div>';});h+='</div>';h+='<div class="day-foot">\u2194 Total: ~'+td.toFixed(1)+" km \u00b7 "+stops.length+" stop"+(stops.length>1?"s":"");h+=' <button onclick="optimizeDay()" style="margin-left:8px">\ud83d\udccd Optimize</button>';h+=' <button onclick="exportDay()" style="margin-left:4px;background:#3498db">\ud83d\udcc4 Export</button></div>';title.textContent="\ud83d\udcc5 "+fmtDate(activeDate)+" \u00b7 "+stops.length+" stop"+(stops.length>1?"s":"")+" \u00b7 ~"+td.toFixed(0)+"km";panel.classList.add("has-stops");}document.getElementById("dayBody").innerHTML=h;setupDrag();}
 function removeStop(idx){var stops=getStops(),p=stops.indexOf(idx);if(p>=0){stops.splice(p,1);if(stops.length===0)delete schedule[activeDate];}saveSched();renderDay();showRoute();refreshMarkers();}
 function toggleDay(){document.getElementById("dayBar").classList.toggle("open");renderDay();}
 function optimizeDay(){var stops=getStops().slice();if(stops.length<3)return;var best=stops.slice(),bd=calcDist(best);for(var i=0;i<200;i++){var c=best.slice(),a=Math.floor(Math.random()*(c.length-1))+1,b=Math.floor(Math.random()*(c.length-1))+1,t=c[a];c[a]=c[b];c[b]=t;var d=calcDist(c);if(d<bd){best=c;bd=d;}}schedule[activeDate]=best;saveSched();renderDay();showRoute();refreshMarkers();}
@@ -864,7 +876,7 @@ function openLead(idx){activeLead=idx;var l=LEADS[idx],vs=visits["l"+idx]||{stat
 function saveNotes(idx){var c=document.getElementById("leadContact"),n=document.getElementById("leadNote");if(!c||!n)return;notes["n"+idx]={contact:c.value.trim(),note:n.value.trim()};try{localStorage.setItem("jpro_notes",JSON.stringify(notes));}catch(e){}}
 function closePanel(){if(activeLead!==null)saveNotes(activeLead);document.getElementById("panel").classList.remove("open");activeLead=null;}
 function setStatus(idx,s){var k="l"+idx;if(!visits[k])visits[k]={status:0,visits:[]};visits[k].status=s;try{localStorage.setItem("jpro_visits",JSON.stringify(visits));}catch(e){}refreshMarkers();openLead(idx);}
-function addVisit(idx){var n=document.getElementById("visitNote").value.trim();if(!n)return;var k="l"+idx;if(!visits[k])visits[k]={status:0,visits:[]};visits[k].visits.unshift({t:new Date().toISOString(),n:n});try{localStorage.setItem("jpro_visits",JSON.stringify(visits));}catch(e){}refreshMarkers();openLead(idx);}
+function addVisit(idx){var n=document.getElementById("visitNote").value.trim();if(!n)return;var k="l"+idx;if(!visits[k])visits[k]={status:0,visits:[]};visits[k].visits.unshift({t:new Date().toISOString(),n:n});try{localStorage.setItem("jpro_visits",JSON.stringify(visits));}catch(e){}var fuDate=addDays(today,7);if(!schedule[fuDate])schedule[fuDate]=[];if(schedule[fuDate].indexOf(idx)<0){schedule[fuDate].push(idx);saveSched();}refreshMarkers();openLead(idx);}
 function delVisit(idx,vi){var k="l"+idx;if(visits[k]){visits[k].visits.splice(vi,1);try{localStorage.setItem("jpro_visits",JSON.stringify(visits));}catch(e){}refreshMarkers();openLead(idx);}}
 function hideLead(idx){if(!confirm("Hide this lead?"))return;hidden.add(idx);try{localStorage.setItem("jpro_hidden",JSON.stringify([...hidden]));}catch(e){}closePanel();refreshMarkers();doFilter();}
 function restoreHidden(){if(hidden.size===0)return;if(confirm("Restore "+hidden.size+" leads?")){hidden.clear();try{localStorage.setItem("jpro_hidden","[]");}catch(e){}refreshMarkers();doFilter();}}
