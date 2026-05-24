@@ -1028,13 +1028,26 @@ function switchTab(tab){
   if(tab==='map'){
     showEls(true,true,true,true);
     if(typeof map!=='undefined'&&map)setTimeout(function(){map.invalidateSize();},200);
+    if(typeof renderDay==='function')renderDay();
+    if(typeof doFilter==='function')doFilter();
   }else if(tab==='leads'){
     showEls(false,false,true,false);
     if(lv){lv.classList.add('open');populateLeadsFilters();populateLeadsTable();}
   }else if(tab==='calendar'){
     showEls(true,true,true,false);
     if(typeof map!=='undefined'&&map)setTimeout(function(){map.invalidateSize();},200);
-    if(cv){cv.classList.add('open');setCalView('day');}
+    if(cv){cv.classList.add('open');
+      // Re-read schedule from localStorage to ensure fresh data
+      try{var s=JSON.parse(localStorage.getItem('jpro_schedule')||'{}');for(var k in s)schedule[k]=s[k];}catch(e){}
+      try{var td=JSON.parse(localStorage.getItem('jpro_taskDone')||'{}');for(var k in td)taskDone[k]=td[k];}catch(e){}
+      // If today has no stops, go to nearest future date with stops
+      var today=fmtISO(new Date());
+      if(!schedule[today]||schedule[today].length===0){
+        var keys=Object.keys(schedule).filter(function(k){return k>=today&&schedule[k].length>0;}).sort();
+        if(keys.length>0){calAnchor_=new Date(keys[0]+'T12:00:00');}
+      }
+      setCalView('day');
+    }
   }else if(tab==='tasks'){
     showEls(true,true,true,false);
     if(typeof map!=='undefined'&&map)setTimeout(function(){map.invalidateSize();},200);
@@ -1117,7 +1130,7 @@ function calNav(dir){
   renderCalView();
 }
 
-function fmtISO(d){return d.toISOString().split('T')[0];}
+function fmtISO(d){var y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),da=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+da;}
 function fmtPretty(ds){
   var p=ds.split('-'),mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   return mn[parseInt(p[1])-1]+' '+parseInt(p[2])+', '+p[0];
