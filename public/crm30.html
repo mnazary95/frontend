@@ -873,7 +873,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 	}
 </style>
 </head><body>
-<div id="versionBadge" style="position:absolute;top:4px;right:4px;z-index:9999;background:rgba(243,156,18,0.9);color:#000;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;font-family:system-ui">v30.2</div>
+<div id="versionBadge" style="position:absolute;top:4px;right:4px;z-index:9999;background:rgba(243,156,18,0.9);color:#000;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;font-family:system-ui">v30.3</div>
 <div id="load"><div class="spinner"></div><h2 style="color:#f39c12">Loading...</h2><div id="errMsg"></div></div>
 <div id="topbar">
 <div id="top-row">
@@ -1345,7 +1345,7 @@ function showMoreMenu(){
   if(hidden.size>0)h.push('<button style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #e67e22;color:#e67e22;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit" onclick="restoreHidden();switchTab(\'map\')">🔄 Restore '+hidden.size+' Hidden</button>');
   h.push('<button onclick="syncToSupabase()" style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #f39c12;color:#f39c12;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit">\u2601\ufe0f Save to Cloud</button>');
   h.push('<button onclick="syncFromSupabase()" style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #444;color:#ddd;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit">\ud83d\udce5 Load from Cloud</button>');
-  h.push('<div style="margin-top:16px;padding:12px;background:#1a1a2e;border-radius:8px;font-size:12px;color:#888"><strong>JPRO CRM v30.2</strong><br>'+LEADS.length+' leads \u2022 '+Object.keys(iColors).length+' industries</div>');
+  h.push('<div style="margin-top:16px;padding:12px;background:#1a1a2e;border-radius:8px;font-size:12px;color:#888"><strong>JPRO CRM v30.3</strong><br>'+LEADS.length+' leads \u2022 '+Object.keys(iColors).length+' industries</div>');
   h.push('</div>');
   wrap.innerHTML=h.join('');
 }
@@ -1445,7 +1445,7 @@ function calViewRoute_(){
 <script>var loadTimeout=setTimeout(function(){document.getElementById("load").querySelector("h2").textContent="Still loading...";},5000);
 setTimeout(function(){if(typeof updateTaskBadge==="function")updateTaskBadge();},800);
 /* ========= SUPABASE SYNC LAYER v30 ========= */
-var SB_URL="https://jzsftbponllrxmaruqr.supabase.co";
+var SB_URL="https://jzsftbponnllrxmaruqr.supabase.co";
 var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp6c2Z0YnBvbm5sbHJ4bWFydXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2NjY4MzYsImV4cCI6MjA5NTI0MjgzNn0.Z1xmcW6eGPgDJDUeYDPYCMidZkcp6aVHoSWGraEHlOE";
 var REP_ID="rep1";
 
