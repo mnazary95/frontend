@@ -1075,6 +1075,8 @@ function switchTab(tab){
       showTasks();
     }else if(tab==='more'){
       if(elM)elM.style.display='none';if(elD)elD.style.display='none';if(elL)elL.style.display='none';
+      var lt=document.getElementById('leadsTop');if(lt)lt.style.display='none';
+      var lc=document.getElementById('leadsCount');if(lc)lc.style.display='none';
       var lv=document.getElementById('leadsView');if(lv){lv.classList.add('open');showMoreMenu();}
     }
   }
