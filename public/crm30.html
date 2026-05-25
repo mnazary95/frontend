@@ -873,7 +873,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 	}
 </style>
 </head><body>
-<div id="versionBadge" style="position:absolute;top:4px;right:4px;z-index:9999;background:rgba(243,156,18,0.9);color:#000;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;font-family:system-ui">v30.3</div>
+<div id="versionBadge" style="position:absolute;top:4px;right:4px;z-index:9999;background:rgba(243,156,18,0.9);color:#000;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;font-family:system-ui">v30.5</div>
 <div id="load"><div class="spinner"></div><h2 style="color:#f39c12">Loading...</h2><div id="errMsg"></div></div>
 <div id="topbar">
 <div id="top-row">
@@ -1344,8 +1344,8 @@ function showMoreMenu(){
   h.push('<button style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #444;color:#ddd;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit" onclick="resetFilters();switchTab(\'map\')">↺ Reset All Filters</button>');
   if(hidden.size>0)h.push('<button style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #e67e22;color:#e67e22;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit" onclick="restoreHidden();switchTab(\'map\')">🔄 Restore '+hidden.size+' Hidden</button>');
   h.push('<button onclick="syncToSupabase()" style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #f39c12;color:#f39c12;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit">\u2601\ufe0f Save to Cloud</button>');
-  h.push('<button onclick="syncFromSupabase()" style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #444;color:#ddd;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit">\ud83d\udce5 Load from Cloud</button>');
-  h.push('<div style="margin-top:16px;padding:12px;background:#1a1a2e;border-radius:8px;font-size:12px;color:#888"><strong>JPRO CRM v30.3</strong><br>'+LEADS.length+' leads \u2022 '+Object.keys(iColors).length+' industries</div>');
+  h.push('<button onclick="syncLoadFromCloud()" style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #444;color:#ddd;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit">\ud83d\udce5 Load from Cloud</button>');
+  h.push('<div style="margin-top:16px;padding:12px;background:#1a1a2e;border-radius:8px;font-size:12px;color:#888"><strong>JPRO CRM v30.5</strong><br>'+LEADS.length+' leads \u2022 '+Object.keys(iColors).length+' industries</div>');
   h.push('</div>');
   wrap.innerHTML=h.join('');
 }
@@ -1444,131 +1444,122 @@ function calViewRoute_(){
 </script>
 <script>var loadTimeout=setTimeout(function(){document.getElementById("load").querySelector("h2").textContent="Still loading...";},5000);
 setTimeout(function(){if(typeof updateTaskBadge==="function")updateTaskBadge();},800);
-/* ========= SUPABASE SYNC LAYER v30 ========= */
+/* ========= SUPABASE SYNC LAYER v30.3 ========= */
 var SB_URL="https://jzsftbponnllrxmaruqr.supabase.co";
-var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp6c2Z0YnBvbm5sbHJ4bWFydXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2NjY4MzYsImV4cCI6MjA5NTI0MjgzNn0.Z1xmcW6eGPgDJDUeYDPYCMidZkcp6aVHoSWGraEHlOE";
+var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp6c2Z0YnBvbm5sbHJ4bWFydXFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2NjY4MzYsImV4cCI6MjA5NTI0MjgzNn0.Z1xmcW6eGPgDJDUeYDPYCMidZkcp6aVHoSWGraEHlOE";
 var REP_ID="rep1";
 
 function sbH(){return{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json"};}
 
-async function sbFetch(table){
+async function sbCall(method,table,body,filter){
+  var url=SB_URL+"/rest/v1/"+table;
+  if(filter)url+="?rep_id=eq."+REP_ID+(filter==="*"?"":"&"+filter);
+  var opts={method:method,headers:sbH()};
+  if(body){opts.body=JSON.stringify(body);opts.headers["Prefer"]="resolution=merge-duplicates";}
+  var r=await fetch(url,opts);
+  if(!r.ok){var t=await r.text();throw new Error(r.status+": "+t.substring(0,80));}
+  if(method==="GET")return r.json();
+  return null;
+}
+
+
+
+var _syncing=false;
+async function syncToSupabase(){
+  if(_syncing){showToast("Already syncing...");return;}
+  _syncing=true;
   try{
-    var r=await fetch(SB_URL+"/rest/v1/"+table+"?select=*&rep_id=eq."+REP_ID,{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}});
-    return await r.json();
-  }catch(e){return null;}
+    /* Schedules */
+    await sbCall("DELETE","schedules","*");
+    var rows=[],d;
+    for(d in schedule)schedule[d].forEach(function(idx){rows.push({rep_id:REP_ID,visit_date:d,lead_index:idx});});
+    if(rows.length>0)await sbCall("POST","schedules",rows);
+    
+    /* Visits */
+    await sbCall("DELETE","visits","*");
+    rows=[];var k;
+    for(k in visits){var vi=parseInt(k.substring(1));rows.push({rep_id:REP_ID,lead_index:vi,status:visits[k].status,visit_log:visits[k].visits});}
+    if(rows.length>0)await sbCall("POST","visits",rows);
+    
+    /* Notes */
+    await sbCall("DELETE","notes","*");
+    rows=[];
+    for(k in notes){var ni=parseInt(k.substring(1));rows.push({rep_id:REP_ID,lead_index:ni,contact:notes[k].contact||"",note:notes[k].note||""});}
+    if(rows.length>0)await sbCall("POST","notes",rows);
+    
+    /* Hidden */
+    await sbCall("DELETE","hidden_leads","*");
+    rows=[];hidden.forEach(function(idx){rows.push({rep_id:REP_ID,lead_index:idx});});
+    if(rows.length>0)await sbCall("POST","hidden_leads",rows);
+    
+    /* Tasks */
+    await sbCall("DELETE","task_done","*");
+    rows=[];taskDone.forEach(function(dt){rows.push({rep_id:REP_ID,task_date:dt,completed:true});});
+    if(rows.length>0)await sbCall("POST","task_done",rows);
+    
+    /* Saved Trips */
+    await sbCall("DELETE","saved_trips","*");
+    rows=[];var td;for(td in savedTrips)rows.push({rep_id:REP_ID,trip_date:td,stops:savedTrips[td]});
+    if(rows.length>0)await sbCall("POST","saved_trips",rows);
+    
+    showToast("Synced to cloud");
+  }catch(e){
+    showToast("Sync failed: "+e.message);
+  }
+  _syncing=false;
 }
 
-async function sbUpsert(table,rows){
-  try{
-    var ur=await fetch(SB_URL+"/rest/v1/"+table,{method:"POST",headers:sbH(),body:JSON.stringify(rows)});if(!ur.ok){var te=await ur.text();throw new Error(ur.status+" "+te.substring(0,100));}
-  }catch(e){}
+var _syncTimer=null;
+function queueSync(){
+  if(_syncTimer)clearTimeout(_syncTimer);
+  _syncTimer=setTimeout(syncToSupabase,2000);
 }
 
-async function sbDelete(table){
-  try{
-    var dr=await fetch(SB_URL+"/rest/v1/"+table+"?rep_id=eq."+REP_ID,{method:"DELETE",headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}});if(!dr.ok){var de=await dr.text();throw new Error(dr.status+" "+de.substring(0,100));}
-  }catch(e){}
-}
-
-async function sbSaveSched(){
-  var rows=[],d;
-  for(d in schedule)schedule[d].forEach(function(idx){rows.push({rep_id:REP_ID,visit_date:d,lead_index:idx});});
-  await sbDelete("schedules");
-  if(rows.length>0)await sbUpsert("schedules",rows);
-}
-
-async function sbSaveVisits(){
-  var rows=[],k;
-  for(k in visits){var idx=parseInt(k.substring(1));rows.push({rep_id:REP_ID,lead_index:idx,status:visits[k].status,visit_log:visits[k].visits});}
-  await sbDelete("visits");
-  if(rows.length>0)await sbUpsert("visits",rows);
-}
-
-async function sbSaveNotes(){
-  var rows=[],k;
-  for(k in notes){var idx=parseInt(k.substring(1));rows.push({rep_id:REP_ID,lead_index:idx,contact:notes[k].contact||"",note:notes[k].note||""});}
-  await sbDelete("notes");
-  if(rows.length>0)await sbUpsert("notes",rows);
-}
-
-async function sbSaveHidden(){
-  var rows=[];
-  hidden.forEach(function(idx){rows.push({rep_id:REP_ID,lead_index:idx});});
-  await sbDelete("hidden_leads");
-  if(rows.length>0)await sbUpsert("hidden_leads",rows);
-}
-
-async function sbSaveTasks(){
-  var rows=[];
-  taskDone.forEach(function(d){rows.push({rep_id:REP_ID,task_date:d,completed:true});});
-  await sbDelete("task_done");
-  if(rows.length>0)await sbUpsert("task_done",rows);
-}
-
-async function sbSaveTrips(){
-  var rows=[],d;
-  for(d in savedTrips)rows.push({rep_id:REP_ID,trip_date:d,stops:savedTrips[d]});
-  await sbDelete("saved_trips");
-  if(rows.length>0)await sbUpsert("saved_trips",rows);
-}
-
-function syncToSupabase(){
-  try{sbSaveSched();sbSaveVisits();sbSaveNotes();sbSaveHidden();sbSaveTasks();sbSaveTrips();
-  showToast("Synced to cloud");}catch(e){showToast("Sync error: "+e.message);}
-}
-
-async function syncFromSupabase(){
-  try{
-    var schedRows=await sbFetch("schedules");
-    if(schedRows&&schedRows.length){
-      var ns={};schedRows.forEach(function(r){if(!ns[r.visit_date])ns[r.visit_date]=[];ns[r.visit_date].push(r.lead_index);});
-      schedule=ns;saveSchedLocal();
-    }
-    var visitRows=await sbFetch("visits");
-    if(visitRows&&visitRows.length){
-      visitRows.forEach(function(r){visits["l"+r.lead_index]={status:r.status,visits:r.visit_log||[]};});
-      saveVisitsLocal();
-    }
-    var noteRows=await sbFetch("notes");
-    if(noteRows&&noteRows.length){
-      noteRows.forEach(function(r){notes["n"+r.lead_index]={contact:r.contact||"",note:r.note||""};});
-      saveNotesLocal();
-    }
-    var hiddenRows=await sbFetch("hidden_leads");
-    if(hiddenRows&&hiddenRows.length){hidden.clear();hiddenRows.forEach(function(r){hidden.add(r.lead_index);});saveHiddenLocal();}
-    var taskRows=await sbFetch("task_done");
-    if(taskRows&&taskRows.length){taskDone.length=0;taskRows.forEach(function(r){if(r.completed)taskDone.push(r.task_date);});saveTasksLocal();}
-    var tripRows=await sbFetch("saved_trips");
-    if(tripRows&&tripRows.length){savedTrips={};tripRows.forEach(function(r){savedTrips[r.trip_date]=r.stops;});saveTripsLocal();}
-    refreshMarkers();doFilter();if(currentTab==="calendar")renderCalendar();renderDay();showRoute();updateTaskBadge();
-    showToast("Loaded from cloud");
-  }catch(e){showToast("Cloud sync unavailable");}
-}
+/* Override saveSched to queue a sync */
+var _origSaveSched=saveSched;
+saveSched=function(){_origSaveSched();queueSync();};
 
 function saveSchedLocal(){try{localStorage.setItem("jpro_schedule",JSON.stringify(schedule));}catch(e){}}
-function saveVisitsLocal(){try{localStorage.setItem("jpro_visits",JSON.stringify(visits));}catch(e){}}
-function saveNotesLocal(){try{localStorage.setItem("jpro_notes",JSON.stringify(notes));}catch(e){}}
-function saveHiddenLocal(){try{localStorage.setItem("jpro_hidden",JSON.stringify([...hidden]));}catch(e){}}
-function saveTasksLocal(){try{localStorage.setItem("jpro_taskDone",JSON.stringify(taskDone));}catch(e){}}
-function saveTripsLocal(){try{localStorage.setItem("jpro_saved_trips",JSON.stringify(savedTrips));}catch(e){}}
+function syncLoadFromCloud(){
+  showToast("Loading from cloud...");
+  (async function(){
+    try{
+      var data=await sbCall("GET","schedules","*");
+      if(data&&data.length){
+        var ns={};data.forEach(function(r){if(!ns[r.visit_date])ns[r.visit_date]=[];ns[r.visit_date].push(r.lead_index);});
+        schedule=ns;saveSchedLocal();
+      }
+      data=await sbCall("GET","visits","*");
+      if(data&&data.length){
+        data.forEach(function(r){visits["l"+r.lead_index]={status:r.status,visits:r.visit_log||[]};});
+        try{localStorage.setItem("jpro_visits",JSON.stringify(visits));}catch(e){}
+      }
+      data=await sbCall("GET","notes","*");
+      if(data&&data.length){
+        data.forEach(function(r){notes["n"+r.lead_index]={contact:r.contact||"",note:r.note||""};});
+        try{localStorage.setItem("jpro_notes",JSON.stringify(notes));}catch(e){}
+      }
+      data=await sbCall("GET","hidden_leads","*");
+      if(data&&data.length){hidden.clear();data.forEach(function(r){hidden.add(r.lead_index);});try{localStorage.setItem("jpro_hidden",JSON.stringify([...hidden]));}catch(e){}}
+      data=await sbCall("GET","task_done","*");
+      if(data&&data.length){taskDone.length=0;data.forEach(function(r){if(r.completed)taskDone.push(r.task_date);});try{localStorage.setItem("jpro_taskDone",JSON.stringify(taskDone));}catch(e){}}
+      data=await sbCall("GET","saved_trips","*");
+      if(data&&data.length){savedTrips={};data.forEach(function(r){savedTrips[r.trip_date]=r.stops;});try{localStorage.setItem("jpro_saved_trips",JSON.stringify(savedTrips));}catch(e){}}
+      refreshMarkers();doFilter();if(currentTab==="calendar")renderCalendar();renderDay();showRoute();updateTaskBadge();
+      showToast("Loaded from cloud");
+    }catch(e){
+      showToast("Load failed: "+e.message);
+    }
+  })();
+}
 
 function showToast(msg){
   var t=document.getElementById("sbToast");
-  if(!t){t=document.createElement("div");t.id="sbToast";t.style.cssText="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(243,156,18,0.95);color:#000;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;z-index:9999;pointer-events:none;transition:opacity .3s";document.body.appendChild(t);}
-  t.textContent=msg;t.style.opacity="1";clearTimeout(t._t);t._t=setTimeout(function(){t.style.opacity="0";},2000);
+  if(!t){t=document.createElement("div");t.id="sbToast";t.style.cssText="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(243,156,18,0.95);color:#000;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;z-index:9999;pointer-events:none;transition:opacity .3s;font-family:system-ui,sans-serif";document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity="1";clearTimeout(t._t);t._t=setTimeout(function(){t.style.opacity="0";},3000);
 }
 
-function schedChanged(){saveSchedLocal();sbSaveSched();}
-function visitsChanged(){saveVisitsLocal();sbSaveVisits();}
-function notesChanged(){saveNotesLocal();sbSaveNotes();}
-function hiddenChanged(){saveHiddenLocal();sbSaveHidden();}
-function tasksChanged(){saveTasksLocal();sbSaveTasks();}
-function tripsChanged(){saveTripsLocal();sbSaveTrips();}
+function _origSetStatusOrig(){return false;}
 
-/* Modify saveSched to auto-sync */
-var _origSaveSched=saveSched;
-saveSched=function(){_origSaveSched();sbSaveSched();};
-var _origSetStatus=setStatus;
-var _origSetStatusOrig=false;
 </script>
 </body></html>
