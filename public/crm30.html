@@ -873,7 +873,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 	}
 </style>
 </head><body>
-<div id="versionBadge" style="position:absolute;top:4px;right:4px;z-index:9999;background:rgba(243,156,18,0.9);color:#000;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;font-family:system-ui">v30</div>
+<div id="versionBadge" style="position:absolute;top:4px;right:4px;z-index:9999;background:rgba(243,156,18,0.9);color:#000;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;font-family:system-ui">v30.1</div>
 <div id="load"><div class="spinner"></div><h2 style="color:#f39c12">Loading...</h2><div id="errMsg"></div></div>
 <div id="topbar">
 <div id="top-row">
@@ -1345,7 +1345,7 @@ function showMoreMenu(){
   if(hidden.size>0)h.push('<button style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #e67e22;color:#e67e22;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit" onclick="restoreHidden();switchTab(\'map\')">🔄 Restore '+hidden.size+' Hidden</button>');
   h.push('<button onclick="syncToSupabase()" style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #f39c12;color:#f39c12;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit">\u2601\ufe0f Save to Cloud</button>');
   h.push('<button onclick="syncFromSupabase()" style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #444;color:#ddd;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit">\ud83d\udce5 Load from Cloud</button>');
-  h.push('<div style="margin-top:16px;padding:12px;background:#1a1a2e;border-radius:8px;font-size:12px;color:#888"><strong>JPRO CRM v30</strong><br>'+LEADS.length+' leads \u2022 '+Object.keys(iColors).length+' industries</div>');
+  h.push('<div style="margin-top:16px;padding:12px;background:#1a1a2e;border-radius:8px;font-size:12px;color:#888"><strong>JPRO CRM v30.1</strong><br>'+LEADS.length+' leads \u2022 '+Object.keys(iColors).length+' industries</div>');
   h.push('</div>');
   wrap.innerHTML=h.join('');
 }
@@ -1460,55 +1460,61 @@ async function sbFetch(table){
 
 async function sbUpsert(table,rows){
   try{
-    await fetch(SB_URL+"/rest/v1/"+table,{method:"POST",headers:sbH(),body:JSON.stringify(rows)});
+    var ur=await fetch(SB_URL+"/rest/v1/"+table,{method:"POST",headers:sbH(),body:JSON.stringify(rows)});if(!ur.ok){var te=await ur.text();throw new Error(ur.status+" "+te.substring(0,100));}
   }catch(e){}
 }
 
 async function sbDelete(table){
   try{
-    await fetch(SB_URL+"/rest/v1/"+table+"?rep_id=eq."+REP_ID,{method:"DELETE",headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}});
+    var dr=await fetch(SB_URL+"/rest/v1/"+table+"?rep_id=eq."+REP_ID,{method:"DELETE",headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}});if(!dr.ok){var de=await dr.text();throw new Error(dr.status+" "+de.substring(0,100));}
   }catch(e){}
 }
 
-function sbSaveSched(){
+async function sbSaveSched(){
   var rows=[],d;
   for(d in schedule)schedule[d].forEach(function(idx){rows.push({rep_id:REP_ID,visit_date:d,lead_index:idx});});
-  sbDelete("schedules").then(function(){sbUpsert("schedules",rows);});
+  await sbDelete("schedules");
+  if(rows.length>0)await sbUpsert("schedules",rows);
 }
 
-function sbSaveVisits(){
+async function sbSaveVisits(){
   var rows=[],k;
   for(k in visits){var idx=parseInt(k.substring(1));rows.push({rep_id:REP_ID,lead_index:idx,status:visits[k].status,visit_log:visits[k].visits});}
-  sbDelete("visits").then(function(){sbUpsert("visits",rows);});
+  await sbDelete("visits");
+  if(rows.length>0)await sbUpsert("visits",rows);
 }
 
-function sbSaveNotes(){
+async function sbSaveNotes(){
   var rows=[],k;
   for(k in notes){var idx=parseInt(k.substring(1));rows.push({rep_id:REP_ID,lead_index:idx,contact:notes[k].contact||"",note:notes[k].note||""});}
-  sbDelete("notes").then(function(){sbUpsert("notes",rows);});
+  await sbDelete("notes");
+  if(rows.length>0)await sbUpsert("notes",rows);
 }
 
-function sbSaveHidden(){
+async function sbSaveHidden(){
   var rows=[];
   hidden.forEach(function(idx){rows.push({rep_id:REP_ID,lead_index:idx});});
-  sbDelete("hidden_leads").then(function(){sbUpsert("hidden_leads",rows);});
+  await sbDelete("hidden_leads");
+  if(rows.length>0)await sbUpsert("hidden_leads",rows);
 }
 
-function sbSaveTasks(){
+async function sbSaveTasks(){
   var rows=[];
   taskDone.forEach(function(d){rows.push({rep_id:REP_ID,task_date:d,completed:true});});
-  sbDelete("task_done").then(function(){sbUpsert("task_done",rows);});
+  await sbDelete("task_done");
+  if(rows.length>0)await sbUpsert("task_done",rows);
 }
 
-function sbSaveTrips(){
+async function sbSaveTrips(){
   var rows=[],d;
   for(d in savedTrips)rows.push({rep_id:REP_ID,trip_date:d,stops:savedTrips[d]});
-  sbDelete("saved_trips").then(function(){sbUpsert("saved_trips",rows);});
+  await sbDelete("saved_trips");
+  if(rows.length>0)await sbUpsert("saved_trips",rows);
 }
 
 function syncToSupabase(){
   try{sbSaveSched();sbSaveVisits();sbSaveNotes();sbSaveHidden();sbSaveTasks();sbSaveTrips();
-  showToast("Synced to cloud");}catch(e){showToast("Sync failed");}
+  showToast("Synced to cloud");}catch(e){showToast("Sync error: "+e.message);}
 }
 
 async function syncFromSupabase(){
