@@ -873,7 +873,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 	}
 </style>
 </head><body>
-<div id="versionBadge" style="position:absolute;top:4px;right:4px;z-index:9999;background:rgba(243,156,18,0.9);color:#000;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;font-family:system-ui">v33.1</div>
+<div id="versionBadge" style="position:absolute;top:4px;right:4px;z-index:9999;background:rgba(243,156,18,0.9);color:#000;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;font-family:system-ui">v33.2</div>
 <div id="load"><div class="spinner"></div><h2 style="color:#f39c12">Loading...</h2><div id="errMsg"></div></div>
 <div id="topbar">
 <div id="top-row">
@@ -1345,7 +1345,7 @@ function showMoreMenu(){
   if(hidden.size>0)h.push('<button style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #e67e22;color:#e67e22;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit" onclick="restoreHidden();switchTab(\'map\')">🔄 Restore '+hidden.size+' Hidden</button>');
   h.push('<button onclick="syncToSupabase()" style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #f39c12;color:#f39c12;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit">\u2601\ufe0f Save to Cloud</button>');
   h.push('<button onclick="syncLoadFromCloud()" style="width:100%;margin-bottom:8px;padding:12px;background:#2a2a3e;border:1px solid #444;color:#ddd;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit">\ud83d\udce5 Load from Cloud</button>');
-  h.push('<div style="margin-top:16px;padding:12px;background:#1a1a2e;border-radius:8px;font-size:12px;color:#888"><strong>JPRO CRM v33.1</strong><br>'+LEADS.length+' leads \u2022 '+Object.keys(iColors).length+' industries</div>');
+  h.push('<div style="margin-top:16px;padding:12px;background:#1a1a2e;border-radius:8px;font-size:12px;color:#888"><strong>JPRO CRM v33.2</strong><br>'+LEADS.length+' leads \u2022 '+Object.keys(iColors).length+' industries</div>');
   h.push('</div>');
   wrap.innerHTML=h.join('');
 }
@@ -1474,36 +1474,40 @@ async function syncToSupabase(){
   _syncing=true;
   try{
     var rows=[],d,k;
-    
-    /* Schedules - set active dates then upsert */
-    rows=[];for(d in schedule)schedule[d].forEach(function(idx){rows.push({rep_id:REP_ID,visit_date:d,lead_index:idx});});
-    console.log("SYNC: upserting "+rows.length+" schedules");
-    if(rows.length>0)await sbCall("POST","schedules",rows);
+
+    /* Schedules */
+    if(typeof schedule==="object"){
+      rows=[];for(d in schedule){if(schedule.hasOwnProperty(d))schedule[d].forEach(function(idx){rows.push({rep_id:REP_ID,visit_date:d,lead_index:idx});});}
+      console.log("SYNC: "+rows.length+" schedules");
+      if(rows.length>0)await sbCall("POST","schedules",rows);
+    }
     
     /* Visits */
-    rows=[];for(k in visits){var vi=parseInt(k.substring(1));rows.push({rep_id:REP_ID,lead_index:vi,status:visits[k].status,visit_log:visits[k].visits});}
-    console.log("SYNC: upserting "+rows.length+" visits");
-    if(rows.length>0)await sbCall("POST","visits",rows);
+    if(typeof visits==="object"){
+      rows=[];for(k in visits){if(visits.hasOwnProperty(k)){var vi=parseInt(k.substring(1));if(!isNaN(vi))rows.push({rep_id:REP_ID,lead_index:vi,status:visits[k].status,visit_log:visits[k].visits});}}
+      console.log("SYNC: "+rows.length+" visits");
+      if(rows.length>0)await sbCall("POST","visits",rows);
+    }
     
     /* Notes */
-    rows=[];for(k in notes){var ni=parseInt(k.substring(1));rows.push({rep_id:REP_ID,lead_index:ni,contact:notes[k].contact||"",note:notes[k].note||""});}
-    console.log("SYNC: upserting "+rows.length+" notes");
-    if(rows.length>0)await sbCall("POST","notes",rows);
+    if(typeof notes==="object"){
+      rows=[];for(k in notes){if(notes.hasOwnProperty(k)){var ni=parseInt(k.substring(1));if(!isNaN(ni))rows.push({rep_id:REP_ID,lead_index:ni,contact:notes[k].contact||"",note:notes[k].note||""});}}
+      console.log("SYNC: "+rows.length+" notes");
+      if(rows.length>0)await sbCall("POST","notes",rows);
+    }
     
     /* Hidden */
-    rows=[];hidden.forEach(function(idx){rows.push({rep_id:REP_ID,lead_index:idx});});
-    console.log("SYNC: upserting "+rows.length+" hidden");
-    if(rows.length>0)await sbCall("POST","hidden_leads",rows);
+    if(hidden&&hidden.forEach){rows=[];hidden.forEach(function(idx){rows.push({rep_id:REP_ID,lead_index:idx});});console.log("SYNC: "+rows.length+" hidden");if(rows.length>0)await sbCall("POST","hidden_leads",rows);}
     
     /* Tasks */
-    rows=[];taskDone.forEach(function(dt){rows.push({rep_id:REP_ID,task_date:dt,completed:true});});
-    console.log("SYNC: upserting "+rows.length+" tasks");
-    if(rows.length>0)await sbCall("POST","task_done",rows);
+    if(taskDone&&taskDone.forEach){rows=[];taskDone.forEach(function(dt){rows.push({rep_id:REP_ID,task_date:dt,completed:true});});console.log("SYNC: "+rows.length+" tasks");if(rows.length>0)await sbCall("POST","task_done",rows);}
     
     /* Saved Trips */
-    rows=[];var td;for(td in savedTrips)rows.push({rep_id:REP_ID,trip_date:td,stops:savedTrips[td]});
-    console.log("SYNC: upserting "+rows.length+" trips");
-    if(rows.length>0)await sbCall("POST","saved_trips",rows);
+    if(typeof savedTrips==="object"){
+      rows=[];var td;for(td in savedTrips){if(savedTrips.hasOwnProperty(td))rows.push({rep_id:REP_ID,trip_date:td,stops:savedTrips[td]});}
+      console.log("SYNC: "+rows.length+" trips");
+      if(rows.length>0)await sbCall("POST","saved_trips",rows);
+    }
     
     showToast("Synced to cloud");
   }catch(e){
